@@ -171,7 +171,7 @@ class HomeViewController: UIViewController {
             myFundslabel.topAnchor.constraint(equalTo: portfolioView.bottomAnchor, constant: 24),
             myFundslabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 12),
             
-            viewAllButton.topAnchor.constraint(equalTo: portfolioView.bottomAnchor, const),
+            viewAllButton.topAnchor.constraint(equalTo: portfolioView.bottomAnchor, constant: 12),
 //            viewAllButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -12),
             
             myFundsCollectionView.topAnchor.constraint(equalTo: myFundslabel.bottomAnchor, constant: -8),

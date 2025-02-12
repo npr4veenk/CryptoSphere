@@ -35,7 +35,7 @@ class GradientChartView: UIView {
     var config: Configuration
     private var selectedTimeIndex = 0
     private var priceLabels: [String] = []
-    private var originalDataPoints: [CGFloat] = [1]
+    private var originalDataPoints: [CGFloat] = []
     
 //    private lazy var timeSegmentControl: UISegmentedControl = {
 //        let control = UISegmentedControl(items: config.timeLabels)

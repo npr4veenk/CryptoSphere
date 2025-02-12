@@ -15,13 +15,13 @@ struct ChartViews: View {
         self.lineWidth = 3
     }
     
-    
+    @State private var progress: CGFloat = 0
     @State private var chartData: [PreviousData] = []
     @State private var cancellable: AnyCancellable?
     @State private var lineColor: Color = .gray
     
     static var chartColor: Color = .gray
-    
+
     var body: some View {
         VStack {
             if !chartData.isEmpty {
@@ -49,14 +49,16 @@ struct ChartViews: View {
                 .lineStyle(StrokeStyle(lineWidth: CGFloat(lineWidth)))
             }
         }
+        .mask(Rectangle().scaleEffect(x: progress, anchor: .leading))
         .chartYScale(domain: yAxisDomain)
         .chartXAxis(.hidden)
         .chartYAxis(.hidden) // Hide Y axis
         .onAppear {
             setLineColor()
             Task{
-                await updateData()
+                await getData()
             }
+            withAnimation(.easeOut(duration: 1)) { progress = 1 }
         }
     }
     
@@ -98,14 +100,6 @@ struct ChartViews: View {
         lineColor = last > first ? .green : last < first ? .red : .gray
         ChartViews.chartColor = lineColor
     }
-}
-
-struct PercentageLabel: View {
-    
-    var body: some View {
-        Text("")
-    }
-    
 }
 
 #Preview {
