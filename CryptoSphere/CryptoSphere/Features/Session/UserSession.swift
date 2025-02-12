@@ -16,7 +16,6 @@ class UserSession {
     var userName: String?
     var emailAddress: String?
     var profileImageURL: String?
-    
     init(isSignedIn: Bool = false, userName: String? = nil, emailAddress: String? = nil, profileImageURL: String? = nil) {
         self.isSignedIn = isSignedIn
         self.userName = userName

@@ -76,7 +76,7 @@ struct AllUsersListView: View {
         Task {
             defer { isLoading = false }
             do {
-                users = try await NetworkManager.shared.getUsers()
+                users = try await ServerResponce.shared.getUsers()
             } catch {
                 print("Failed to fetch users: \(error.localizedDescription)")
             }

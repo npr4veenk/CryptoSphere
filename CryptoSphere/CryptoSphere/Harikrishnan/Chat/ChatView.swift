@@ -50,7 +50,7 @@ struct ChatView: View {
         .onAppear {
             from = globalViewModel.session.username
             Task{
-                messageHistory = try await NetworkManager.shared.getChatHistory(to: toUser.username)
+                messageHistory = try await ServerResponce.shared.getChatHistory(to: toUser.username)
             }
         }
     }

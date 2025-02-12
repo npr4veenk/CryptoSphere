@@ -97,7 +97,7 @@ struct ReceiveView: View {
     
     func getAddress() async {
         do {
-            let fetchedAddress = try await NetworkManager.shared.fetchCoinAddresses(
+            let fetchedAddress = try await ServerResponce.shared.fetchCoinAddresses(
                 userName: globalViewModel.session.username,
                 coinId: coin.id
             )

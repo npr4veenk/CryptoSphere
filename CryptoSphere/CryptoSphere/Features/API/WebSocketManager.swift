@@ -1,16 +1,21 @@
+//
+//  WebSocketManager.swift
+//  CryptoSphere
+//
+//  Created by Harikrishnan V on 2025-02-12.
+//
+
+
 import Foundation
 import Combine
 
 
 class WebSocketManager: ObservableObject {
-    
-    
     @Published var messages: [Message] = []
     private var webSocketTask: URLSessionWebSocketTask?
     private let username: String
     private let urlSession: URLSession
 
-    // WebSocket connection status
     private(set) var isConnected: Bool = false
     
 
@@ -23,31 +28,25 @@ class WebSocketManager: ObservableObject {
 
     // Connect to WebSocket server
     func connect() async {
-        await disconnect()  // Ensure previous connections are closed
-
+        await disconnect()
         guard let url = URL(string: "wss://snake-loving-bear.ngrok-free.app/ws/\(username)") else {
             print("❌ Invalid WebSocket URL")
             return
         }
-        print("🔗 Attempting to connect to \(url.absoluteString)")
-
         webSocketTask = urlSession.webSocketTask(with: url)
         webSocketTask?.resume()
-
-        try? await Task.sleep(nanoseconds: 2_000_000_000)  // Wait for connection
+        try? await Task.sleep(nanoseconds: 2_000_000_000)
 
         if webSocketTask?.state == .running {
-            print("✅ WebSocket connection successful!")
+            print("✅ WebSocket connection successful! \(url.absoluteString)")
             isConnected = true
             await receiveMessages()
         } else {
             print("❌ WebSocket connection failed! Retrying in 5 sec...")
-            try? await Task.sleep(nanoseconds: 5_000_000_000)  // Wait 3 sec before retrying
+            try? await Task.sleep(nanoseconds: 5_000_000_000)
             await connect()
         }
     }
-
-    // Send a message to a specific user
     func sendMessage(to user: String, message: String) async {
         guard let webSocketTask else {
             print("❌ WebSocket is not connected")
@@ -60,25 +59,18 @@ class WebSocketManager: ObservableObject {
             return
         }
 
-        // Create a Message object
         let timestamp = Int(Date().timeIntervalSince1970)
         let messageObject = Message(from: username, to: user, message: message, timestamp: timestamp)
         
-        // Convert the message object to JSON
         do {
             let jsonData = try JSONEncoder().encode(messageObject)
             let jsonString = String(data: jsonData, encoding: .utf8)
-            
-            print("📤 Sending message: \(jsonString ?? "")")
-            
-            // Send the message as a string (JSON)
             do {
                 try await webSocketTask.send(.string(jsonString ?? ""))
-                print("✅ Message sent successfully")
+                print("✅ Message sent successfully \(jsonString ?? "")")
             } catch {
                 print("❌ Error sending message: \(error.localizedDescription)")
             }
-            
         } catch {
             print("❌ Error encoding message: \(error.localizedDescription)")
         }
@@ -99,8 +91,6 @@ class WebSocketManager: ObservableObject {
                 switch result {
                 case .string(let message):
                     print("📩 Received raw message: \(message)")
-
-                    // Decode the received JSON message
                     if let jsonData = message.data(using: .utf8) {
                         do {
                             let receivedMessage = try JSONDecoder().decode(Message.self, from: jsonData)
@@ -135,6 +125,3 @@ class WebSocketManager: ObservableObject {
         isConnected = false
     }
 }
-
-
-

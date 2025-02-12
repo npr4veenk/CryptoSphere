@@ -6,7 +6,7 @@ struct ChatListView: View {
     
     var body: some View {
         VStack {
-            UsersListView(onSelectUser: { user in
+            AllUsersListView(onSelectUser: { user in
                 AnyView(ChatView(toUser: (user as! User)))
             })
             Spacer()
