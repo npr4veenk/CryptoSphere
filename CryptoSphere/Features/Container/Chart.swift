@@ -1,0 +1,114 @@
+import SwiftUI
+import Charts
+import Combine
+
+struct ChartViews: View {
+    let coin: String
+    let lineWidth: Int
+    init(coin: String, lineWidth: Int){
+        self.coin = coin
+        self.lineWidth = lineWidth
+    }
+    
+    init(coin: String){
+        self.coin = coin
+        self.lineWidth = 3
+    }
+    
+    
+    @State private var chartData: [PreviousData] = []
+    @State private var cancellable: AnyCancellable?
+    @State private var lineColor: Color = .gray
+    
+    static var chartColor: Color = .gray
+    
+    var body: some View {
+        VStack {
+            if !chartData.isEmpty {
+                AnimatedChart()
+            } else {
+                ProgressView()
+            }
+        }
+        .onAppear {
+            Task {
+                await getData()
+                print(coin)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    func AnimatedChart() -> some View {
+        Chart {
+            ForEach(chartData) { data in
+                LineMark(x: .value("Time", data.formattedTime, unit: .second),
+                          y: .value("Price", data.close ))
+                .foregroundStyle(lineColor)
+                .interpolationMethod(.catmullRom)
+                .lineStyle(StrokeStyle(lineWidth: CGFloat(lineWidth)))
+            }
+        }
+        .chartYScale(domain: yAxisDomain)
+        .chartXAxis(.hidden)
+        .chartYAxis(.hidden) // Hide Y axis
+        .onAppear {
+            setLineColor()
+            Task{
+                await updateData()
+            }
+        }
+    }
+    
+    private var yAxisDomain: ClosedRange<Double> {
+        let closes = chartData.map { $0.close }
+        guard let minClose = closes.min(), let maxClose = closes.max() else {
+            return 0...0
+        }
+        return minClose...maxClose
+    }
+    
+    func getData() async {
+        let now = Int(Date().timeIntervalSince1970 * 1000)
+        let start = Int(Calendar.current.date(byAdding: .hour, value: -24, to: Date())!.timeIntervalSince1970 * 1000)
+        let intervals = [1, 3, 5, 15, 30, 60, 120, 240, 360, 720]
+        let interval = String(intervals.first { $0 >= Int((Double(now - start) / (1000 * 60 * 25)).rounded(.up)) } ?? intervals.last!)
+        
+        do {
+            chartData = try await PreviousPriceResponse().fetchPreviousPrice(coinName: coin, from: start, to: now, interval: interval).reversed()
+            setLineColor()
+        } catch {
+            print("Error fetching data: \(error)")
+        }
+    }
+    
+    func updateData() async {
+        cancellable = Timer.publish(every: 1, on: .main, in: .common)
+            .autoconnect()
+            .sink { _ in
+                Task {
+                    await getData()
+                }
+            }
+    }
+    
+    func setLineColor() {
+        let first = chartData.first?.close ?? 0
+        let last = chartData.last?.close ?? 0
+        lineColor = last > first ? .green : last < first ? .red : .gray
+        ChartViews.chartColor = lineColor
+    }
+}
+
+struct PercentageLabel: View {
+    
+    var body: some View {
+        Text("")
+    }
+    
+}
+
+#Preview {
+    ChartViews(coin: "BTCUSDT")
+        .padding(60)
+}
