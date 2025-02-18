@@ -16,26 +16,30 @@ struct SendView: View {
             
             // Coin Details
             coinDetailsView()
+                .padding(.top, 40)
             
-            // Transfer Address Input
-            addressInputView()
-            
-                .onAppear {
-                    if(globalViewModel.selectedCoin.coin.id != 0 && globalViewModel.selectedUser.username != ""){
-                        setUpAddress()
+            VStack(spacing: 30){
+                // Transfer Address Input
+                addressInputView()
+                
+                    .onAppear {
+                        if(globalViewModel.selectedCoin.coin.id != 0 && globalViewModel.selectedUser.username != ""){
+                            setUpAddress()
+                        }
                     }
-                }
-                .onDisappear {
-                    globalViewModel.selectedCoin = UserHolding(email: "", coin: CoinDetails(id: 0, coinName: "", coinSymbol: "", imageUrl: ""), quantity: 2)
-                    
-                    globalViewModel.selectedUser = User(email: "", username: "", password: "", profilePicture: "")
-                }
-            
-            // Amount Input
-            amountInputView()
+                    .onDisappear {
+                        globalViewModel.selectedCoin = UserHolding(email: "", coin: CoinDetails(id: 0, coinName: "", coinSymbol: "", imageUrl: ""), quantity: 2)
+                        
+                        globalViewModel.selectedUser = User(email: "", username: "", password: "", profilePicture: "")
+                    }
+                
+                // Amount Input
+                amountInputView()
+            }.padding(.top, 40)
             
             // Confirm Button
             confirmButton()
+                .padding(.top, 40)
             Spacer()
         }
         .padding()
@@ -71,7 +75,7 @@ struct SendView: View {
     private func headerView() -> some View {
         HStack {
             Text("Send \(userHolding.coin.coinSymbol)")
-                .font(.title2.bold())
+                .font(.custom("ZohoPuvi-Bold", size: 32))
                 .foregroundStyle(.font)
             Spacer()
         }
@@ -89,40 +93,42 @@ struct SendView: View {
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(userHolding.coin.coinName)
-                    .font(.headline)
+                    .font(.custom("ZohoPuvi-Semibold", size: 22))
                     .foregroundStyle(.font)
                 
                 Text(userHolding.coin.coinSymbol)
-                    .font(.subheadline)
+                    .font(.custom("ZohoPuvi-Semibold", size: 16))
                     .foregroundStyle(.secondaryFont)
                 
             }
             Spacer()
         }
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color("GrayButtonColor"))
         .cornerRadius(12)
     }
     
     private func addressInputView() -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Recipient Address")
-                .font(.subheadline)
+                .font(.custom("ZohoPuvi-Semibold", size: 20))
                 .foregroundStyle(.font)
             
             HStack {
                 TextField("Enter wallet address", text: $transferAddress)
+                    .font(.custom("ZohoPuvi-Semibold", size:18))
                     .autocapitalization(.none)
                     .foregroundStyle(.secondaryFont)
                     .disableAutocorrection(true)
                     .padding()
-                    .background(Color(.systemGray6))
+                    .background(Color("GrayButtonColor"))
                     .cornerRadius(8)
                 
                 Button(action: { isShowingScanner = true }) {
                     Image(systemName: "qrcode.viewfinder")
-                        .padding()
-                        .background(Color(.systemGray5))
+                        .font(.system(size: 35))
+                        .padding(6)
+                        .background(Color("GrayButtonColor"))
                         .foregroundStyle(Color("primaryTheme"))
                         .cornerRadius(8)
                 }
@@ -133,7 +139,7 @@ struct SendView: View {
     private func amountInputView() -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Amount")
-                .font(.subheadline)
+                .font(.custom("ZohoPuvi-Semibold", size: 20))
                 .foregroundStyle(.font)
             
             TextField("0", text: $amount)
@@ -141,15 +147,15 @@ struct SendView: View {
                 .foregroundStyle(.secondaryFont)
                 .font(.largeTitle.bold())
                 .multilineTextAlignment(.center)
-                .padding()
-                .background(Color(.systemGray6))
+                .padding(10)
+                .background(Color("GrayButtonColor"))
                 .cornerRadius(12)
                 .onChange(of: amount) { _ ,newValue in
                     amount = newValue.filter { "0123456789.".contains($0) }
                 }
             
             Text("Available: \(userHolding.quantity, specifier: "%.4f") \(userHolding.coin.coinSymbol)")
-                .font(.caption)
+                .font(.headline)
                 .foregroundColor(.gray)
         }
     }
@@ -157,6 +163,7 @@ struct SendView: View {
     private func confirmButton() -> some View {
         Button(action: { isConfirmingTransfer = true }) {
             Text("Confirm Transfer")
+                .font(.custom("ZohoPuvi-Bold", size: 22))
                 .frame(maxWidth: .infinity)
                 .padding()
                 .background(Color("primaryTheme"))
