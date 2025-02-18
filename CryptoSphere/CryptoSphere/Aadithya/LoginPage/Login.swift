@@ -37,7 +37,7 @@ struct Login: View {
             ZStack {
                 Color(.grayButton)
                     .frame(width: width, height: height)
-                    .clipShape(CustomCorner(corners: [.topLeft, .topRight], radius: 310))
+                    .clipShape(CustomCorner(corners: [.topLeft, .topRight], radius: 30))
                     .padding(.top, 100)
                 
                 VStack {
@@ -61,7 +61,8 @@ struct Login: View {
                         showSheet()
                     }) {
                         Text("Get Started")
-                            .font(.custom("ZohoPuvi-Bold", size: 24))               .foregroundColor(.white)
+                            .font(.custom("ZohoPuvi-Bold", size: 24))
+                            .foregroundColor(.white)
                             .frame(width: 280, height: 60)
                     }
                     .background(.primaryTheme)

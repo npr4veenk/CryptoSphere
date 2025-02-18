@@ -225,7 +225,7 @@ extension GPayScannerViewController: UIImagePickerControllerDelegate, UINavigati
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         picker.dismiss(animated: true)
 
-        if let image = info[.originalImage] as? UIImage {
+        if info[.originalImage] is UIImage {
             print("Selected image from gallery")
             // Add logic to process the selected image (e.g., detect QR code)
         }

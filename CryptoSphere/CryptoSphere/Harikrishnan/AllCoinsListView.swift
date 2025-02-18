@@ -17,6 +17,7 @@ struct AllCoinsListView: View {
     @State private var searchText: String = ""
     @State private var coins: [CoinDetails] = []
     @State private var userHoldings: [UserHolding] = []
+    @State private var coinValues: [String: Double] = [:]
     @State private var isLoading: Bool = false
     
     @Namespace private var animation
@@ -52,8 +53,34 @@ struct AllCoinsListView: View {
                                             globalViewModel.selectedCoin = userHolding
                                         }
                                 } label: {
-                                    SymbolWithNameView(coin: userHolding.coin, searchText: $searchText)
+                                    HStack {
+                                        SymbolWithNameView(coin: userHolding.coin, searchText: $searchText)
+                                        
+                                        Spacer()
+                                        VStack(alignment: .trailing, spacing: 8) {
+                                            Spacer()
+                                            HStack {
+                                                Text("Quantity :")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.secondary)
+                                                
+                                                Text(String(format: "%.2f", userHolding.quantity ))
+                                                    .font(.body)
+                                                    .foregroundColor(.primary)
+                                            }
+                                            HStack {
+                                                Text("Value :")
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.secondary)
+                                                Text(String(format: "%.2f", userHolding.quantity * coinValues[userHolding.coin.id] ?? 0))
+                                                    .font(.body)
+                                                    .foregroundColor(.primary)
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal)
                                 }
+                                
                                 Divider()
                                     .background(.primary)
                             }
@@ -63,6 +90,7 @@ struct AllCoinsListView: View {
                                     onSelectCoin(coin)
                                 } label: {
                                     SymbolWithNameView(coin: coin, searchText: $searchText)
+                                        .padding(.horizontal)
                                 }
                                 Divider()
                                     .background(.primary)
@@ -96,6 +124,15 @@ struct AllCoinsListView: View {
             } catch {
                 print("Failed to fetch coins: \(error.localizedDescription)")
             }
+        }
+    }
+    
+    private func getPrice(coinSymbol: String) async -> Double {
+        do {
+            return try await LivePriceResponse().fetchPrice(coinName: coinSymbol).result.list[0].price
+        } catch {
+            print("Error fetching price: \(error)")
+            return 0.0
         }
     }
     
