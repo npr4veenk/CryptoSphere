@@ -4,9 +4,20 @@
 <dict>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Zoho Puvi Light.ttf</string>
-        <string>Zoho Puvi Medium.ttf</string>
+        
+        <string>Zoho Puvi Black.ttf</string>
+        <string>Zoho Puvi Bold Italic.ttf</string>
         <string>Zoho Puvi Bold.ttf</string>
+        <string>Zoho Puvi Extrablack.ttf</string>
+        <string>Zoho Puvi Extrabold.ttf</string>
+        <string>Zoho Puvi Extralight.ttf</string>
+        <string>Zoho Puvi Light.ttf</string>
+        <string>Zoho Puvi Medium.ttf</string>
+        <string>Zoho Puvi Regular Italic.ttf</string>
+        <string>Zoho Puvi Regular.ttf</string>
+        <string>Zoho Puvi Semibold Italic.ttf</string>
+        <string>Zoho Puvi Semibold.ttf</string>
+        <string>Zoho Puvi Thin.ttf</string>
         
 	</array>
 	<key>UIApplicationSceneManifest</key>

@@ -123,7 +123,7 @@ struct SendView: View {
                     Image(systemName: "qrcode.viewfinder")
                         .padding()
                         .background(Color(.systemGray5))
-                        .foregroundStyle(.orange.gradient)
+                        .foregroundStyle(Color("primaryTheme"))
                         .cornerRadius(8)
                 }
             }
@@ -159,7 +159,7 @@ struct SendView: View {
             Text("Confirm Transfer")
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(.orange.gradient)
+                .background(Color("primaryTheme"))
                 .foregroundColor(.font)
                 .cornerRadius(12)
         }

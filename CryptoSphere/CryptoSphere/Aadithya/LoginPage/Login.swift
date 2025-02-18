@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import GoogleSignIn
+import SwiftData
 
 // MARK: Assigned constants for screen size in Global Scope
 let height = UIScreen.main.bounds.height
@@ -14,14 +16,19 @@ var slideSheet = false
 
 struct Login: View {
     
+    @Query private var sessions: [UserSession]
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.globalViewModel) private var globalViewModel
+    @State var currentSession: UserSession = UserSession()
+    
     @State private var currentOffset: CGFloat = 0
     @GestureState private var gestureOffset: CGFloat = 0
     @State private var lastOffset: CGFloat = 0
-    @State private var visibleCount = 0  // Tracks how many sentences are visible
+    @State private var visibleCount = 0
     @State private var scale = 0.0
     @State private var secScale = 0.0
     @State private var slideInitial = 140.0
-    @State private var infoPadding = 30.0
+    @State private var infoOffset = 50.0
     
     let sentences = [
         "You're only a few steps away",
@@ -49,7 +56,7 @@ struct Login: View {
                     VStack(spacing: 10) {
                         ForEach(sentences.indices, id: \.self) { index in
                             Text(sentences[index])
-                                .font(.custom("Rockwell", size: 25))
+                                .font(.custom("ZohoPuvi-Bold", size: 27))
                                 .foregroundStyle(.white)
                                 .opacity(visibleCount > index ? 1 : 0)
                         }
@@ -61,35 +68,54 @@ struct Login: View {
                         showSheet()
                     }) {
                         Text("Get Started")
-                            .font(.custom("ZohoPuvi-Bold", size: 24))
-                            .foregroundColor(.white)
+                            .tracking(2)
+                            .font(.custom("ZohoPuvi-ExtraBold", size: 25))               .foregroundColor(.white)
                             .frame(width: 280, height: 60)
                     }
                     .background(.primaryTheme)
                     .clipShape(RoundedRectangle(cornerRadius: 65))
-                    .padding(.top, 40)
+                    .offset(y: 40)
                     .scaleEffect(scale)
                     
                     VStack{
                         Page()
-                            .padding(.top, infoPadding)
+                            .offset(y : infoOffset)
                         
                         Button(action: {}) {
                             HStack(spacing: 15){
                                 Image("GoogleIcon")
                                     .resizable()
-                                    .frame(width: 35, height: 35)
-                                
+                                    .frame(width: 40, height: 40)
+
                                 Text("Sign in with Google")
-                                    .font(.custom("Rockwell-Bold", size: 25))
+                                    .font(.custom("ZohoPuvi-ExtraBold", size: 24))
                                     .foregroundColor(.grayButton)
-                                    .padding(.top, 10)
+                                    .onTapGesture {
+                                        let targetSession = UserSession(isSignedIn: false)
+                                        modelContext.insert(targetSession)
+                                        
+                                        GIDSignIn.sharedInstance.signIn(withPresenting: getRootViewController()) { result, error in
+                                            guard let user = result?.user, error == nil else {
+                                                print("Sign in error: \(String(describing: error))")
+                                                return
+                                            }
+                                            
+                                            targetSession.isSignedIn = true
+                                            targetSession.userName = user.profile?.name
+                                            targetSession.emailAddress = user.profile?.email
+                                            targetSession.profileImageURL = user.profile?.imageURL(withDimension: 100)?.absoluteString
+                                            UserSession.shared = targetSession
+                                            currentSession = targetSession
+                                            
+                                            globalViewModel.session = User(email: targetSession.emailAddress ?? "", username: targetSession.userName ?? "", password: "Google Sign In", profilePicture: targetSession.profileImageURL ?? "")
+                                        }
+                                    }
                             }
-                            .frame(width: 330, height: 60)
+                            .frame(width: 330, height: 50)
                         }
                         .background(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .padding(.top, 30)
+                        .offset(y:-40)
                         .scaleEffect(secScale)
                     }
                     
@@ -101,16 +127,15 @@ struct Login: View {
                                 .foregroundStyle(.black)
                             
                             Text("Sign in with Apple")
-                                .font(.custom("Rockwell-Bold", size: 25))
+                                .font(.custom("ZohoPuvi-ExtraBold", size: 24))
                                 .foregroundColor(.grayButton)
-                                .padding(.top, 10)
                         }
-                        .frame(width: 330, height: 60)
-
+                        .frame(width: 330, height: 50)
+                        
                     }
                     .background(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .padding(.top, 30)
+                    .offset(y:-20)
                     .scaleEffect(secScale)
                 }
                 .frame(maxHeight: .infinity, alignment: .top)
@@ -129,7 +154,7 @@ struct Login: View {
             )
         }
         .onAppear {
-        
+            
             DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
                 withAnimation(.easeOut(duration: 0.5)){
                     slideInitial = 380
@@ -143,16 +168,44 @@ struct Login: View {
                             visibleCount += 1
                         }
                     }
-            }
-            
+                }
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    withAnimation(.easeOut(duration: 0.3)) {
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+                    withAnimation(.easeOut(duration: 0.2)) {
                         scale = 1
                     }
                 }
             }
         }
+        .onAppear { restoreSession() }
+    }
+    
+    private func restoreSession() {
+        if sessions.isEmpty {
+            return
+        }
+        
+        let session = UserSession()
+        
+        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
+            session.isSignedIn = user != nil && error == nil
+            session.userName = user?.profile?.name
+            session.emailAddress = user?.profile?.email
+            session.profileImageURL = user?.profile?.imageURL(withDimension: 100)?.absoluteString
+            currentSession = session
+            UserSession.shared = session
+            
+            globalViewModel.session = User(email: session.emailAddress ?? "", username: session.userName ?? "", password: "Google Sign In", profilePicture: session.profileImageURL ?? "")
+        }
+    }
+    
+    private func getRootViewController() -> UIViewController {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootViewController = scene.windows.first?.rootViewController else {
+            return UIViewController()
+        }
+        return rootViewController
     }
     
     func onChange() {
@@ -167,7 +220,7 @@ struct Login: View {
             if (-currentOffset > maxDrag / 4 || slideSheet == true) {
                 currentOffset = -maxDrag
                 scale = 0
-                infoPadding = -100
+                infoOffset = -90
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     withAnimation{
@@ -176,7 +229,7 @@ struct Login: View {
                 }
             } else {
                 currentOffset = 0
-                infoPadding = 20
+                infoOffset = 50
                 scale = 1
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
@@ -190,7 +243,7 @@ struct Login: View {
             slideSheet = false
         }
     }
-
+    
     
     func getBlurRadius() -> CGFloat {
         let progress = -currentOffset / (height - 380)
@@ -200,8 +253,8 @@ struct Login: View {
 
 struct Page: View {
     @State private var selectedTab = 0
-    private let tabCount = 3 // Number of tabs
-
+    private let tabCount = 3
+    
     var body: some View {
         TabView(selection: $selectedTab) {
             OnboardView(imageName: "chart.bar.fill", title: "Charts", description: "Visualize real-time and historical crypto price trends with interactive charts.")
@@ -220,7 +273,7 @@ struct Page: View {
             startAutoScroll()
         }
     }
-
+    
     private func startAutoScroll() {
         Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { timer in
             withAnimation {
@@ -244,8 +297,7 @@ struct OnboardView: View{
                 .foregroundColor(.primaryTheme)
             
             Text(title)
-                .font(.custom("Verdana-Bold", size: 30))
-                .tracking(2)
+                .font(.custom("ZohoPuvi-ExtraBold", size: 28))
             
             Text(description)
                 .font(.custom("Rockwell", size: 20))
@@ -259,5 +311,5 @@ struct OnboardView: View{
 
 
 #Preview {
-    Login()
+    ContentView()
 }
