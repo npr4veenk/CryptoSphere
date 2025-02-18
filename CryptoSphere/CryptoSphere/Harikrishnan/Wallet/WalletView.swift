@@ -33,27 +33,29 @@ struct WalletView: View {
     }
     
     func walletData() -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 20) {
             HStack {
                 Image(systemName: "wallet.bifold")
-                    .font(.title2)
+                    .font(.title)
                 Text("Your Balance")
-                    .font(.headline)
+                    .font(.custom("ZohoPuvi-Bold", size: 22))
             }
             
             Text("\(balance, format: .currency(code: "USD"))")
-                .font(.title)
-                .bold()
-                .padding()
-            
+                .font(.custom("ZohoPuvi-Bold", size: 28))
+                .padding(.vertical, 10)
             HStack(spacing: 16) {
                 Button(action: { isSendActionSheetPresented = true }) {
                     HStack {
                         Image(systemName: "paperplane")
+                            .font(.title)
+                            .bold()
                         Text("Send")
+                            .font(.custom("ZohoPuvi-Bold", size: 22))
                     }
-                    .padding()
                     .frame(maxWidth: .infinity)
+                    .padding(11)
+
                     .background(Color("primaryTheme"))
                     .foregroundColor(.font)
                     .cornerRadius(12)
@@ -62,14 +64,18 @@ struct WalletView: View {
                 Button(action: { isReceiveActionSheetPresented = true }) {
                     HStack {
                         Image(systemName: "arrow.down.to.line.alt")
-                           
+                            .font(.title)
+                            .bold()
+                        
                         Text("Receive")
+                            .font(.custom("ZohoPuvi-Bold", size: 22))
 
                     }
-                    .padding()
                     .frame(maxWidth: .infinity)
-                    .background(.black.gradient)
-                    .foregroundColor(.white)
+                    .padding(14)
+
+                    .background(Color("GrayButtonColor"))
+                    .foregroundColor(.font)
                     .cornerRadius(12)
                 }
             }
@@ -140,8 +146,8 @@ struct SearchBar: View {
                 .foregroundColor(.secondary)
             
             TextField("Search coins", text: $text)
-                .font(.system(.body, design: .rounded))
-            
+                .font(.custom("ZohoPuvi-Bold", size: 22))
+
             if !text.isEmpty {
                 Button {
                     text = ""
@@ -151,8 +157,7 @@ struct SearchBar: View {
                 }
             }
         }
-        .padding(12)
-        .background(Color(.systemBackground))
+        .background(Color("GrayButtonColor"))
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.03), radius: 5, y: 3)
     }

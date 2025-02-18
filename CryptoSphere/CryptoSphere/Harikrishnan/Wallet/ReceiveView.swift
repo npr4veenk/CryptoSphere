@@ -12,10 +12,10 @@ struct ReceiveView: View {
             // Header
             VStack(spacing: 4) {
                 Text("Receive \(coin.coinSymbol)")
-                    .font(.system(size: 24, weight: .semibold))
+                    .font(.custom("ZohoPuvi-Bold", size: 25))
                 
                 Text("Scan or copy the address")
-                    .font(.subheadline)
+                    .font(.custom("ZohoPuvi-Semibold", size: 18))
                     .foregroundColor(.gray)
             }
             .padding(.top, 24)
@@ -45,9 +45,9 @@ struct ReceiveView: View {
                 } else {
                     VStack(spacing: 8) {
                         Image(systemName: "xmark.circle")
-                            .font(.system(size: 32))
+                            .font(.system(size: 40, weight: .bold))
                         Text("Address unavailable")
-                            .font(.subheadline)
+                            .font(.custom("ZohoPuvi-Semibold", size: 18))
                     }
                     .foregroundColor(.red)
                 }
@@ -60,8 +60,7 @@ struct ReceiveView: View {
                     Image(systemName: "doc.on.doc")
                     Text("Copy Address")
                 }
-                .font(.headline)
-                .foregroundColor(.white)
+                .font(.custom("ZohoPuvi-Semibold", size: 20))                .foregroundColor(.white)
                 .padding()
                 .frame(maxWidth: .infinity)
                 .background(Color.orange.gradient)
@@ -72,7 +71,7 @@ struct ReceiveView: View {
             .padding(.horizontal, 32)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.systemGroupedBackground))
+        .background(Color(.grayButton))
         .task { await getAddress() }
     }
     

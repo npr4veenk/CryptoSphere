@@ -23,7 +23,7 @@ struct Login: View {
     
     var body: some View {
         if !currentSession.isSignedIn {
-            AnyView(LoginBackgroundView(session: $currentSession))
+            LoginBackgroundView(session: $currentSession)
                 .onAppear { restoreSession() }
         } else {
             AllUsersListView(profileAnimation: profileAnimation, onSelectUser: { user, _ in
@@ -34,6 +34,7 @@ struct Login: View {
             .onAppear {
                 Task{
                     await ServerResponce.shared.addUser(user: globalViewModel.session)
+                    await globalViewModel.wsManager.connect()
                 }
             }
         }

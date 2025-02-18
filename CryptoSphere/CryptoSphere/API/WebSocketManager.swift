@@ -13,14 +13,14 @@ import Combine
 class WebSocketManager: ObservableObject {
     @Published var messages: [Message] = []
     private var webSocketTask: URLSessionWebSocketTask?
-    private let username: String
+    private var username: String
     private let urlSession: URLSession
 
     private(set) var isConnected: Bool = false
     
 
     init() {
-        self.username = UserSession.shared?.userName ?? "Krishnan"
+        self.username = " "
         let configuration = URLSessionConfiguration.default
         self.urlSession = URLSession(configuration: configuration, delegate: nil, delegateQueue: nil)
 //        Task { await connect() }
@@ -28,6 +28,7 @@ class WebSocketManager: ObservableObject {
 
     // Connect to WebSocket server
     func connect() async {
+        self.username = UserSession.shared?.userName ?? "Krishnan"
         await disconnect()
         guard let url = URL(string: "wss://cryptospyer.loca.lt/ws/\(username)") else {
             print("❌ Invalid WebSocket URL")

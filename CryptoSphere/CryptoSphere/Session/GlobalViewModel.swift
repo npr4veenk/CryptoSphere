@@ -20,7 +20,7 @@ class GlobalViewModel {
 
 
 struct GlobalViewModelKey: EnvironmentKey {
-    static var defaultValue: GlobalViewModel = GlobalViewModel()  // Default empty instance
+    static var defaultValue: GlobalViewModel = GlobalViewModel()
 }
 
 extension EnvironmentValues {

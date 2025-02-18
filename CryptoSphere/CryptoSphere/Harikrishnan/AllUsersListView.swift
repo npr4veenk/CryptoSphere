@@ -71,11 +71,11 @@ struct AllUsersListView: View {
                                                 
                                                 VStack(alignment: .leading, spacing: 4) {
                                                     highlightedUsername(user.username)
-                                                        .font(.headline)
+                                                        .font(.custom("ZohoPuvi-Semibold", size: 20))
                                                         .foregroundStyle(Color.primary)
                                                         .matchedGeometryEffect(id: "username_\(user.username)", in: profileAnimation)
                                                     Text(user.email)
-                                                        .font(.subheadline)
+                                                        .font(.custom("ZohoPuvi-Semibold", size: 16))
                                                         .foregroundColor(.secondary)
                                                 }
                                             }
@@ -203,8 +203,7 @@ struct ChatView: View {
             
             VStack(alignment: .leading, spacing: 2){
                 Text(toUser?.username ?? " ")
-                    .font(.headline)
-                    .foregroundColor(.primary)
+                    .font(.custom("ZohoPuvi-Semibold", size: 20))                    .foregroundColor(.primary)
                     .matchedGeometryEffect(id: "username_\(toUser?.username ?? " ")", in: profileAnimation)
                 
                 HStack {
@@ -212,7 +211,7 @@ struct ChatView: View {
                         .fill(.green)
                         .frame(width: 8, height: 8)
                     Text("Online")
-                        .font(.caption)
+                        .font(.custom("ZohoPuvi-Bold", size: 16))
                 }
             }
             
@@ -247,10 +246,10 @@ struct ChatInputView: View {
                     isSheetPresented.toggle()
                 }) {
                     Text("Pay")
-                        .font(.system(size: 16, weight: .semibold)) // Slightly larger & bolder text
-                        .padding(.horizontal, 14)
+                        .font(.custom("ZohoPuvi-Semibold", size: 20))
+                        .padding(.horizontal, 20)
                         .padding(.vertical, 10)
-                        .background(Color("primaryTheme").opacity(0.2), in: RoundedRectangle(cornerRadius: 8)) //
+                        .background(Color("primaryTheme"), in: RoundedRectangle(cornerRadius: 8)) //
                         .foregroundColor(Color("FontColor"))
                         .shadow(color: Color("primaryTheme").opacity(0.1), radius: 4, x: 0, y: 2) // Adds a subtle
                 }
@@ -265,7 +264,8 @@ struct ChatInputView: View {
             // Text Input Field (Expands when focused)
             TextField("Type a message...", text: $messageText)
                 .padding(12)
-                .background(Color(UIColor.systemGray6), in: RoundedRectangle(cornerRadius: 20))
+                .font(.custom("ZohoPuvi-Semibold", size: 18))
+                .background(Color("GrayButtonColor"), in: RoundedRectangle(cornerRadius: 12))
                 .focused($isTextFieldFocused) // Track focus
                 .frame(maxWidth: isTextFieldFocused ? .infinity : 250) // Expands when focused
                 .onTapGesture {
@@ -275,9 +275,9 @@ struct ChatInputView: View {
             // Send Button
             Button(action: onSend) {
                 Image(systemName: "paperplane.fill")
-                    .foregroundColor(messageText.isEmpty ? .gray : Color("primaryTheme"))
+                    .foregroundColor(messageText.isEmpty ? .white : Color("primaryTheme"))
                     .padding(12)
-                    .background(messageText.isEmpty ? Color.gray.opacity(0.1) : Color.orange.opacity(0.1), in: Circle())
+                    .background(messageText.isEmpty ? Color("GrayButtonColor") : .white, in: Circle())
             }
             .disabled(messageText.isEmpty)
         }
