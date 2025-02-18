@@ -59,7 +59,7 @@ struct Login: View {
                             VStack(spacing: 10) {
                                 ForEach(sentences.indices, id: \.self) { index in
                                     Text(sentences[index])
-                                        .font(.custom("ZohoPuvi-Bold", size: 27))
+                                        .font(.custom("ZohoPuvi-Bold", size: 24))
                                         .foregroundStyle(.white)
                                         .opacity(visibleCount > index ? 1 : 0)
                                 }
@@ -73,7 +73,7 @@ struct Login: View {
                                 Text("Get Started")
                                     .font(.custom("ZohoPuvi-Bold", size: 24))
                                     .foregroundColor(.white)
-                                    .frame(width: 280, height: 60)
+                                    .frame(width: 250, height: 50)
                             }
                             .background(.primaryTheme)
                             .clipShape(RoundedRectangle(cornerRadius: 65))
@@ -88,12 +88,11 @@ struct Login: View {
                                     HStack(spacing: 15){
                                         Image("GoogleIcon")
                                             .resizable()
-                                            .frame(width: 40, height: 40)
+                                            .frame(width: 35, height: 35)
                                         
                                         Text("Sign in with Google")
-                                            .font(.custom("ZohoPuvi-ExtraBold", size: 24))
+                                            .font(.custom("ZohoPuvi-ExtraBold", size: 22))
                                             .foregroundColor(.grayButton)
-                                            .padding(.top, 10)
                                             .onTapGesture {
                                                 let targetSession = UserSession(isSignedIn: false)
                                                 modelContext.insert(targetSession)
@@ -127,11 +126,11 @@ struct Login: View {
                                 HStack(spacing: 20){
                                     Image(systemName: "apple.logo")
                                         .resizable()
-                                        .frame(width: 35, height: 40)
+                                        .frame(width: 30, height: 35)
                                         .foregroundStyle(.black)
                                     
                                     Text("Sign in with Apple")
-                                        .font(.custom("ZohoPuvi-ExtraBold", size: 24))
+                                        .font(.custom("ZohoPuvi-ExtraBold", size: 22))
                                         .foregroundColor(.grayButton)
                                 }
                                 .frame(width: 330, height: 50)
