@@ -103,7 +103,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 }
 
-extension UITabBarController: UITabBarControllerDelegate {
+extension UITabBarController: @retroactive UITabBarControllerDelegate {
     public func tabBarController(_ tabBarController: UITabBarController, shouldSelect viewController: UIViewController) -> Bool {
         guard let fromView = selectedViewController?.view,
               let toView = viewController.view,

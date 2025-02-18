@@ -5,7 +5,7 @@ struct ReceiveView: View {
     let coin: CoinDetails
     @State private var address: String?
     @State private var isLoading = true
-    @Environment(GlobalViewModel.self) var globalViewModel
+    @Environment(\.globalViewModel) var globalViewModel
     
     var body: some View {
         VStack(spacing: 16) {

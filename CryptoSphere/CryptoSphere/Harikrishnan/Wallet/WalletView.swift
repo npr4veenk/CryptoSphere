@@ -54,7 +54,7 @@ struct WalletView: View {
                     }
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background(Color("PrimaryColor"))
+                    .background(Color("primaryTheme"))
                     .foregroundColor(.font)
                     .cornerRadius(12)
                 }

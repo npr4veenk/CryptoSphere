@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SendView: View {
     let userHolding: UserHolding
-    @State private var transferAddress: String = ""
+    @State var transferAddress: String = ""
     @State private var amount: String = ""
     @State private var isShowingScanner: Bool = false
     @State private var isConfirmingTransfer: Bool = false
@@ -19,6 +19,17 @@ struct SendView: View {
             
             // Transfer Address Input
             addressInputView()
+            
+                .onAppear {
+                    if(globalViewModel.selectedCoin.coin.id != 0 && globalViewModel.selectedUser.username != ""){
+                        setUpAddress()
+                    }
+                }
+                .onDisappear {
+                    globalViewModel.selectedCoin = UserHolding(email: "", coin: CoinDetails(id: 0, coinName: "", coinSymbol: "", imageUrl: ""), quantity: 2)
+                    
+                    globalViewModel.selectedUser = User(email: "", username: "", password: "", profilePicture: "")
+                }
             
             // Amount Input
             amountInputView()
@@ -44,6 +55,14 @@ struct SendView: View {
             }
         } message: {
             Text("Are you sure you want to transfer \(amount) \(userHolding.coin.coinSymbol) to \(transferAddress)?")
+        }
+    }
+    
+    func setUpAddress() {
+        Task{
+            let UserId = try? await JSONDecoder().decode([String: String].self, from: URLSession.shared.data(from: URL(string: "https://cryptospyer.loca.lt/get_user/\(globalViewModel.selectedUser.username)")!).0)["id"] ?? ""
+            
+            transferAddress = (UserId ?? "") + "_" +  String(globalViewModel.selectedCoin.coin.id)
         }
     }
     

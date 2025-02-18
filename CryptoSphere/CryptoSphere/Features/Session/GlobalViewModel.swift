@@ -11,7 +11,7 @@ import SwiftUI
 
 @Observable
 class GlobalViewModel {
-    var selectedCoin: UserHolding = UserHolding(email: "", coin: CoinDetails(id: 1, coinName: "Bitcoin", coinSymbol: "BTCUSDT", imageUrl: ""), quantity: 2)
+    var selectedCoin: UserHolding = UserHolding(email: "", coin: CoinDetails(id: 0, coinName: "Bitcoin", coinSymbol: "BTCUSDT", imageUrl: ""), quantity: 2)
     var selectedUser: User = User(email: " ", username: "", password: "" , profilePicture: "")
     var wsManager = WebSocketManager()
     

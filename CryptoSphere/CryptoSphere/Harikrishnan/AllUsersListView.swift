@@ -16,6 +16,8 @@ struct AllUsersListView: View {
         searchText.isEmpty ? users : users.filter { $0.username.localizedCaseInsensitiveContains(searchText) }
     }
     
+    @Environment(\.globalViewModel) var globalViewModel
+    
     var body: some View {
         NavigationStack {
             ZStack{
@@ -43,6 +45,7 @@ struct AllUsersListView: View {
                                     withAnimation(.easeIn(duration: 0.2)) {
                                         isNavigating = user
                                         }
+                                    globalViewModel.selectedUser = user
                                     } label: {
                                         VStack (alignment: .leading){
                                             HStack(spacing: 16) {

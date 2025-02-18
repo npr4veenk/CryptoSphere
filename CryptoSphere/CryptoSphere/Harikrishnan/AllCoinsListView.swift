@@ -48,6 +48,9 @@ struct AllCoinsListView: View {
                             ForEach(filteredUserHolding, id: \.self) { userHolding in
                                 NavigationLink {
                                     onSelectCoin(userHolding)
+                                        .onAppear {
+                                            globalViewModel.selectedCoin = userHolding
+                                        }
                                 } label: {
                                     SymbolWithNameView(coin: userHolding.coin, searchText: $searchText)
                                 }
@@ -60,7 +63,6 @@ struct AllCoinsListView: View {
                                     onSelectCoin(coin)
                                 } label: {
                                     SymbolWithNameView(coin: coin, searchText: $searchText)
-                                    
                                 }
                                 Divider()
                                     .background(.primary)
@@ -141,18 +143,18 @@ struct SymbolWithNameView: View {
 }
 
 #Preview {
-    AllCoinsListView(
-        isUserHoldingCoins: false,
-        onSelectCoin: { coin in
-            AnyView(ReceiveView(coin: coin as! CoinDetails))
-        }
-    )
-    
 //    AllCoinsListView(
-//        isUserHoldingCoins: true,
-//        onSelectCoin: { userHolding in
-//            AnyView(SendView(userHolding: userHolding as! UserHolding))
+//        isUserHoldingCoins: false,
+//        onSelectCoin: { coin in
+//            AnyView(ReceiveView(coin: coin as! CoinDetails))
 //        }
 //    )
+    
+    AllCoinsListView(
+        isUserHoldingCoins: true,
+        onSelectCoin: { userHolding in
+            AnyView(SendView(userHolding: userHolding as! UserHolding))
+        }
+    )
 }
 

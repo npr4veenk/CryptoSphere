@@ -5,7 +5,6 @@ struct User: Decodable, Hashable, Encodable {
     let username: String
     let password: String
     let profilePicture: String
-    
 }
 
 struct Message: Decodable, Encodable, Identifiable {
