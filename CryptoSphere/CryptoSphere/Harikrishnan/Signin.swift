@@ -20,10 +20,10 @@ struct ContentView: View {
                     Text("Hello")
                     AllUsersListView(profileAnimation: profileAnimation, onSelectUser: { user, _ in
                         withAnimation{
-                            AnyView(ChatView(toUser: user, profileAnimation: profileAnimation))
+                            AnyView(ChatView(toUser: user, profileAnimation: profileAnimation).environment(GlobalViewModel()))
                         }
                     })
-                    
+                    .environment(GlobalViewModel())
                     // WalletView()
                 }
                 .onAppear {

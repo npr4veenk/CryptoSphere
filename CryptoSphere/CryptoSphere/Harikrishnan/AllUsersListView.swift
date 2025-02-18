@@ -20,86 +20,74 @@ struct AllUsersListView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack{
-                
-                LinearGradient(
-                    gradient: Gradient(colors: [Color.black.opacity(0.8), Color.black.opacity(0.3), Color.black.opacity(0.8)]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .blur(radius: 2)
-                
-                .ignoresSafeArea(.all)
-                
-                if isLoading {
-                    Spacer()
-                    ProgressView("Loading users...")
-                    Spacer()
-                } else if isNavigating != nil {
-                    onSelectUser($isNavigating, profileAnimation)
-                } else {
-                    ScrollView{
-                        LazyVStack(alignment: .leading, spacing: 16){
-                            ForEach(filteredUsers, id: \.self) { user in
-                                Button {
-                                    withAnimation(.easeIn(duration: 0.2)) {
-                                        isNavigating = user
-                                        }
-                                    globalViewModel.selectedUser = user
-                                    } label: {
-                                        VStack (alignment: .leading){
-                                            HStack(spacing: 16) {
-                                                AsyncImage(url: URL(string: user.profilePicture)) { phase in
-                                                    switch phase {
-                                                    case .empty:
-                                                        ProgressView()
-                                                    case .success(let image):
-                                                        image.resizable()
-                                                    case .failure:
-                                                        Image(systemName: "person.circle.fill")
-                                                            .resizable()
-                                                            .foregroundColor(.secondary)
-                                                    @unknown default:
-                                                        EmptyView()
-                                                    }
-                                                }
-                                                .matchedGeometryEffect(id: "profile_\(user.profilePicture)", in: profileAnimation)
-                                                .scaledToFill()
-                                                .frame(width: 60, height: 60)
-                                                .clipShape(Circle())
-                                                .overlay(Circle().stroke(Color.gray.opacity(0.2), lineWidth: 1))
-                                                
-                                                VStack(alignment: .leading, spacing: 4) {
-                                                    highlightedUsername(user.username)
-                                                        .font(.headline)
-                                                        .foregroundStyle(Color.primary)
-                                                        .matchedGeometryEffect(id: "username_\(user.username)", in: profileAnimation)
-                                                    Text(user.email)
-                                                        .font(.subheadline)
-                                                        .foregroundColor(.secondary)
-                                                }
+            if isLoading {
+                Spacer()
+                ProgressView("Loading users...")
+                Spacer()
+            } else if isNavigating != nil {
+                onSelectUser($isNavigating, profileAnimation)
+            } else {
+                ScrollView{
+                    LazyVStack(alignment: .leading, spacing: 16){
+                        ForEach(filteredUsers, id: \.self) { user in
+                            Button {
+                                withAnimation(.easeIn(duration: 0.2)) {
+                                    isNavigating = user
+                                }
+                                globalViewModel.selectedUser = user
+                            } label: {
+                                VStack (alignment: .leading){
+                                    HStack(spacing: 16) {
+                                        AsyncImage(url: URL(string: user.profilePicture)) { phase in
+                                            switch phase {
+                                            case .empty:
+                                                ProgressView()
+                                            case .success(let image):
+                                                image.resizable()
+                                            case .failure:
+                                                Image(systemName: "person.circle.fill")
+                                                    .resizable()
+                                                    .foregroundColor(.secondary)
+                                            @unknown default:
+                                                EmptyView()
                                             }
-                                            .padding(.vertical, 8)
-                                            
-                                            Divider()
+                                        }
+                                        .matchedGeometryEffect(id: "profile_\(user.profilePicture)", in: profileAnimation)
+                                        .scaledToFill()
+                                        .frame(width: 60, height: 60)
+                                        .clipShape(Circle())
+                                        .overlay(Circle().stroke(Color.gray.opacity(0.2), lineWidth: 1))
+                                        
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            highlightedUsername(user.username)
+                                                .font(.headline)
+                                                .foregroundStyle(Color.primary)
+                                                .matchedGeometryEffect(id: "username_\(user.username)", in: profileAnimation)
+                                            Text(user.email)
+                                                .font(.subheadline)
+                                                .foregroundColor(.secondary)
                                         }
                                     }
-                                }
-                                .animation(.easeOut(duration: 0.3), value: filteredUsers)
-                                .refreshable {
-                                    fetchUsers()
+                                    .padding(.vertical, 8)
+                                    
+                                    Divider()
                                 }
                             }
                         }
-                        .padding(.horizontal)
-                        .navigationTitle("Users")
-                        .searchable(text: $searchText, prompt: "Search users")
-                    
+                        .animation(.easeOut(duration: 0.3), value: filteredUsers)
+                        .refreshable {
+                            fetchUsers()
+                        }
                     }
                 }
-            .onAppear { fetchUsers() }
+                .padding(.horizontal)
+                .navigationTitle("Users")
+                .searchable(text: $searchText, prompt: "Search users")
             }
         }
+        .onAppear { fetchUsers() }
+    }
+    
     
     private func fetchUsers() {
         isLoading = true
@@ -145,12 +133,12 @@ struct ChatView: View {
                 ScrollView {
                     LazyVStack(spacing: 8) {
                         ForEach(messageHistory) { msg in
-                            ChatBubbleView(message: msg, isCurrentUser: msg.from == from)
+                            ChatBubbleView(message: msg, isCurrentUser: msg.from == globalViewModel.session.username)
                                 .id(msg.id)
                         }
                     }
-                    .onChange(of: globalViewModel.wsManager.messages.count) {
-                        if let newMessage = globalViewModel.wsManager.messages.last {
+                    .onChange(of: WebSocketManager.shared.messages) {
+                        if let newMessage = WebSocketManager.shared.messages.last {
                             messageHistory.append(newMessage)
                         }
                     }
@@ -194,12 +182,12 @@ struct ChatView: View {
             }
             
             KFImage(URL(string: toUser?.profilePicture ?? " "))
-            .resizable()
-            .scaledToFill()
-            .frame(width: 40, height: 40)
-            .clipShape(Circle())
-            .matchedGeometryEffect(id: "profile_\(toUser?.profilePicture ?? " ")", in: profileAnimation)
-            .padding(.horizontal, 10)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 40, height: 40)
+                .clipShape(Circle())
+                .matchedGeometryEffect(id: "profile_\(toUser?.profilePicture ?? " ")", in: profileAnimation)
+                .padding(.horizontal, 10)
             
             VStack(alignment: .leading, spacing: 2){
                 Text(toUser?.username ?? " ")
@@ -228,7 +216,7 @@ struct ChatView: View {
         messageHistory.append(newMessage)
         messageText = ""
         Task {
-            await globalViewModel.wsManager.sendMessage(to: toUser?.username ?? " ", message: newMessage.message)
+            await WebSocketManager.shared.sendMessage(to: toUser?.username ?? " ", message: newMessage.message)
         }
     }
 }
@@ -238,7 +226,7 @@ struct ChatInputView: View {
     var onSend: () -> Void
     @FocusState private var isTextFieldFocused: Bool
     @State private var isSheetPresented = false
-
+    
     var body: some View {
         HStack {
             // Pay Button (Hides when TextField is focused)
@@ -261,7 +249,7 @@ struct ChatInputView: View {
                     })
                 }
             }
-
+            
             // Text Input Field (Expands when focused)
             TextField("Type a message...", text: $messageText)
                 .padding(12)
@@ -271,7 +259,7 @@ struct ChatInputView: View {
                 .onTapGesture {
                     isTextFieldFocused = true // Ensure focus is set when tapped
                 }
-
+            
             // Send Button
             Button(action: onSend) {
                 Image(systemName: "paperplane.fill")
@@ -284,7 +272,7 @@ struct ChatInputView: View {
         .padding(.horizontal, 9)
         .padding(.vertical, 8)
         .shadow(radius: 5)
-        .animation(.easeInOut(duration: 0.2), value: isTextFieldFocused) // Smooth UI changes
+        .animation(.easeInOut(duration: 0.2), value: isTextFieldFocused)
     }
 }
 
@@ -296,16 +284,3 @@ struct ChatInputView: View {
     })
 }
 
-struct ContentViews: View {
-    @State private var messageText: String = ""
-
-    var body: some View {
-        VStack {
-            ChatInputView(messageText: $messageText) {
-                // Handle send action
-                print("Message sent: \(messageText)")
-                messageText = "" // Clear the input field
-            }
-        }
-    }
-}

@@ -8,7 +8,7 @@ struct User: Decodable, Hashable, Encodable {
     
 }
 
-struct Message: Decodable, Encodable, Identifiable {
+struct Message: Decodable, Encodable, Identifiable, Equatable {
     var id = UUID()
     
     let from: String

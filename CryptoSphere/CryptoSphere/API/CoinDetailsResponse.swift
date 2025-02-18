@@ -8,7 +8,7 @@ struct CoinDetails: Decodable, Encodable, Hashable {
 }
 
 class CoinDetailsResponse{
-    var baseURL = "https://cryptospyer.loca.lt"
+    var baseURL = "https://spyer.pagekite.me/"
     
     func fetchAllCoinDetails() async throws -> [CoinDetails] {
         guard let url = URL(string: "\(baseURL)/coins") else {

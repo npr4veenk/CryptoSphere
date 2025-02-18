@@ -9,28 +9,28 @@
 import Foundation
 import Combine
 
-
-class WebSocketManager: ObservableObject {
-    @Published var messages: [Message] = []
+@Observable
+class WebSocketManager {
+    var messages: [Message] = []
     private var webSocketTask: URLSessionWebSocketTask?
     private var username: String
     private let urlSession: URLSession
 
     private(set) var isConnected: Bool = false
     
+    static let shared = WebSocketManager()
 
     init() {
         self.username = " "
         let configuration = URLSessionConfiguration.default
         self.urlSession = URLSession(configuration: configuration, delegate: nil, delegateQueue: nil)
-//        Task { await connect() }
     }
 
     // Connect to WebSocket server
     func connect() async {
         self.username = UserSession.shared?.userName ?? "Krishnan"
         await disconnect()
-        guard let url = URL(string: "wss://cryptospyer.loca.lt/ws/\(username)") else {
+        guard let url = URL(string: "wss://spyer.pagekite.me/ws/\(username)") else {
             print("❌ Invalid WebSocket URL")
             return
         }
@@ -95,11 +95,10 @@ class WebSocketManager: ObservableObject {
                     if let jsonData = message.data(using: .utf8) {
                         do {
                             let receivedMessage = try JSONDecoder().decode(Message.self, from: jsonData)
-                            print("✅ Received Message: \(receivedMessage)")
-                            
                             DispatchQueue.main.async {
                                 self.messages.append(receivedMessage)
                             }
+                            print(messages.count)
                         } catch {
                             print("❌ Error decoding JSON: \(error.localizedDescription)")
                         }

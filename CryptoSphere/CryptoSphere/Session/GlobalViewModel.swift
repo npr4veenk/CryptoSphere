@@ -13,11 +13,8 @@ import SwiftUI
 class GlobalViewModel {
     var selectedCoin: UserHolding = UserHolding(email: "", coin: CoinDetails(id: 0, coinName: "Bitcoin", coinSymbol: "BTCUSDT", imageUrl: ""), quantity: 2)
     var selectedUser: User = User(email: " ", username: "", password: "" , profilePicture: "")
-    var wsManager = WebSocketManager()
-    
     var session: User = User(email: " ", username: preview, password: "" , profilePicture: "")
 }
-
 
 struct GlobalViewModelKey: EnvironmentKey {
     static var defaultValue: GlobalViewModel = GlobalViewModel()

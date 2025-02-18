@@ -35,6 +35,7 @@ struct Login: View {
                 Task{
                     await globalViewModel.wsManager.connect()
                     await ServerResponce.shared.addUser(user: globalViewModel.session)
+                    await WebSocketManager.shared.connect()
                 }
             }
         }

@@ -128,5 +128,4 @@ struct ReceiveView: View {
         coinSymbol: "BTC",
         imageUrl: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1547033579"
     ))
-    .environment(GlobalViewModel())
 }

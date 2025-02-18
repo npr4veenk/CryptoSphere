@@ -60,7 +60,7 @@ struct SendView: View {
     
     func setUpAddress() {
         Task{
-            let UserId = try? await JSONDecoder().decode([String: String].self, from: URLSession.shared.data(from: URL(string: "https://cryptospyer.loca.lt/get_user/\(globalViewModel.selectedUser.username)")!).0)["id"] ?? ""
+            let UserId = try? await JSONDecoder().decode([String: String].self, from: URLSession.shared.data(from: URL(string: "https://spyer.pagekite.me//get_user/\(globalViewModel.selectedUser.username)")!).0)["id"] ?? ""
             
             transferAddress = (UserId ?? "") + "_" +  String(globalViewModel.selectedCoin.coin.id)
         }
@@ -173,7 +173,7 @@ struct SendView: View {
         print("Transferring \(amount) \(userHolding.coin.coinSymbol) to \(transferAddress)")
         
         
-        await globalViewModel.wsManager.sendMessage(to: " ", message: "@payment,\(globalViewModel.selectedCoin.coin.id),\(amount),\(transferAddress)")
+        await WebSocketManager.shared.sendMessage(to: " ", message: "@payment,\(globalViewModel.selectedCoin.coin.id),\(amount),\(transferAddress)")
     }
 }
 

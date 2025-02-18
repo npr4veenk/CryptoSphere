@@ -18,5 +18,4 @@ struct ChatListView: View {
 
 #Preview {
     ChatListView()
-        .environment(GlobalViewModel())
 }

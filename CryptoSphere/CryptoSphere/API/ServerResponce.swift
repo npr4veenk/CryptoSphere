@@ -12,7 +12,7 @@ class ServerResponce {
     
     static let shared = ServerResponce()
     
-    var baseURL = "https://cryptospyer.loca.lt"
+    var baseURL = "https://spyer.pagekite.me"
     
     func getUsers() async throws -> [User] {
         guard let url = URL(string: "\(baseURL)/get_users") else { return [] }
@@ -25,7 +25,7 @@ class ServerResponce {
         guard let url = URL(string: "\(baseURL)/add_user") else {
             return
         }
-
+        print("Added")
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
