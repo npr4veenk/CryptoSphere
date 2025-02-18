@@ -68,8 +68,8 @@ struct Login: View {
                         showSheet()
                     }) {
                         Text("Get Started")
-                            .tracking(2)
-                            .font(.custom("ZohoPuvi-ExtraBold", size: 25))               .foregroundColor(.white)
+                            .font(.custom("ZohoPuvi-Bold", size: 24))
+                            .foregroundColor(.white)
                             .frame(width: 280, height: 60)
                     }
                     .background(.primaryTheme)
@@ -90,6 +90,7 @@ struct Login: View {
                                 Text("Sign in with Google")
                                     .font(.custom("ZohoPuvi-ExtraBold", size: 24))
                                     .foregroundColor(.grayButton)
+                                    .padding(.top, 10)
                                     .onTapGesture {
                                         let targetSession = UserSession(isSignedIn: false)
                                         modelContext.insert(targetSession)
@@ -298,6 +299,7 @@ struct OnboardView: View{
             
             Text(title)
                 .font(.custom("ZohoPuvi-ExtraBold", size: 28))
+                .foregroundStyle(.white)
             
             Text(description)
                 .font(.custom("Rockwell", size: 20))
