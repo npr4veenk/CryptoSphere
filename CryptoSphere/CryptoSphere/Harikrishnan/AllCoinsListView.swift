@@ -61,19 +61,18 @@ struct AllCoinsListView: View {
                                             Spacer()
                                             HStack {
                                                 Text("Quantity :")
-                                                    .font(.subheadline)
+                                                    .font(.caption)
                                                     .foregroundColor(.secondary)
                                                 
                                                 Text(String(format: "%.2f", userHolding.quantity ))
-                                                    .font(.body)
+                                                    .font(.caption)
                                                     .foregroundColor(.primary)
                                             }
-                                            HStack {
-                                                Text("Value :")
+                                            HStack(spacing: 2) {
+                                                Text("$ ")
+                                                    .foregroundStyle(.primary)
+                                                Text(String(format: "%.2f", (userHolding.quantity * (coinValues[userHolding.coin.coinSymbol] ?? 0.0))))
                                                     .font(.subheadline)
-                                                    .foregroundColor(.secondary)
-                                                Text(String(format: "%.2f", userHolding.quantity * coinValues[userHolding.coin.id] ?? 0))
-                                                    .font(.body)
                                                     .foregroundColor(.primary)
                                             }
                                         }
@@ -82,7 +81,7 @@ struct AllCoinsListView: View {
                                 }
                                 
                                 Divider()
-                                    .background(.primary)
+                                    .background(Color("primaryTheme"))
                             }
                         } else {
                             ForEach(filteredCoins, id: \.self) { coin in
@@ -93,7 +92,7 @@ struct AllCoinsListView: View {
                                         .padding(.horizontal)
                                 }
                                 Divider()
-                                    .background(.primary)
+                                    .background(Color("primaryTheme"))
                             }
                         }
                     }
@@ -118,6 +117,11 @@ struct AllCoinsListView: View {
             do {
                 if isUserHoldingCoins{
                     userHoldings = try await ServerResponce.shared.fetchuserholdings(userName: globalViewModel.session.username)
+                    
+                   for userHolding in userHoldings {
+
+                        coinValues[userHolding.coin.coinSymbol] = await getPrice(coinSymbol: userHolding.coin.coinSymbol)
+                    }
                 } else {
                     coins = try await ServerResponce.shared.fetchAllCoinDetails()
                 }
@@ -129,7 +133,7 @@ struct AllCoinsListView: View {
     
     private func getPrice(coinSymbol: String) async -> Double {
         do {
-            return try await LivePriceResponse().fetchPrice(coinName: coinSymbol).result.list[0].price
+            return try await Double(LivePriceResponse().fetchPrice(coinName: coinSymbol).result.list[0].lastPrice) ?? 0.0
         } catch {
             print("Error fetching price: \(error)")
             return 0.0

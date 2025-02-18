@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import GoogleSignIn
+import SwiftData
 
 // MARK: Assigned constants for screen size in Global Scope
 let height = UIScreen.main.bounds.height
@@ -13,6 +15,11 @@ let width = UIScreen.main.bounds.width
 var slideSheet = false
 
 struct Login: View {
+    
+    @Query private var sessions: [UserSession]
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.globalViewModel) private var globalViewModel
+    @State var currentSession: UserSession = UserSession()
     
     @State private var currentOffset: CGFloat = 0
     @GestureState private var gestureOffset: CGFloat = 0
@@ -84,6 +91,26 @@ struct Login: View {
                                     .font(.custom("Rockwell-Bold", size: 25))
                                     .foregroundColor(.grayButton)
                                     .padding(.top, 10)
+                                    .onTapGesture {
+                                        let targetSession = UserSession(isSignedIn: false)
+                                        modelContext.insert(targetSession)
+                                        
+                                        GIDSignIn.sharedInstance.signIn(withPresenting: getRootViewController()) { result, error in
+                                            guard let user = result?.user, error == nil else {
+                                                print("Sign in error: \(String(describing: error))")
+                                                return
+                                            }
+                                            
+                                            targetSession.isSignedIn = true
+                                            targetSession.userName = user.profile?.name
+                                            targetSession.emailAddress = user.profile?.email
+                                            targetSession.profileImageURL = user.profile?.imageURL(withDimension: 100)?.absoluteString
+                                            UserSession.shared = targetSession
+                                            currentSession = targetSession
+                                            
+                                            globalViewModel.session = User(email: targetSession.emailAddress ?? "", username: targetSession.userName ?? "", password: "Google Sign In", profilePicture: targetSession.profileImageURL ?? "")
+                                        }
+                                    }
                             }
                             .frame(width: 330, height: 60)
                         }
@@ -153,6 +180,34 @@ struct Login: View {
                 }
             }
         }
+        .onAppear { restoreSession() }
+    }
+    
+    private func restoreSession() {
+        if sessions.isEmpty {
+            return
+        }
+        
+        let session = UserSession()
+        
+        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
+            session.isSignedIn = user != nil && error == nil
+            session.userName = user?.profile?.name
+            session.emailAddress = user?.profile?.email
+            session.profileImageURL = user?.profile?.imageURL(withDimension: 100)?.absoluteString
+            currentSession = session
+            UserSession.shared = session
+            
+            globalViewModel.session = User(email: session.emailAddress ?? "", username: session.userName ?? "", password: "Google Sign In", profilePicture: session.profileImageURL ?? "")
+        }
+    }
+    
+    private func getRootViewController() -> UIViewController {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootViewController = scene.windows.first?.rootViewController else {
+            return UIViewController()
+        }
+        return rootViewController
     }
     
     func onChange() {

@@ -14,7 +14,7 @@ class ProfileHeaderView: UIView {
     
     private let nameLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 16, weight: .bold)
+        label.font = Fonts.getPuviFont("bold", 16)
         label.textColor = .white
         return label
     }()
@@ -29,7 +29,7 @@ class ProfileHeaderView: UIView {
     private let toProfileLabel: UILabel = {
         let label = UILabel()
         label.text = "Profile>"
-        label.font = UIFont.systemFont(ofSize: 12, weight: .medium)
+        label.font = Fonts.getPuviFont("medium", 12)
         label.textColor = UIColor.white.withAlphaComponent(0.7)
         return label
     }()

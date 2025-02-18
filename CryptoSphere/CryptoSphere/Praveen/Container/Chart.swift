@@ -58,7 +58,7 @@ struct ChartViews: View {
             Task{
                 await getData()
             }
-            withAnimation(.easeOut(duration: 1)) { progress = 1 }
+            withAnimation(.easeOut(duration: 0.5)) { progress = 1 }
         }
     }
     
