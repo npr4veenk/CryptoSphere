@@ -37,7 +37,7 @@ struct Login: View {
             ZStack {
                 Color(.grayButton)
                     .frame(width: width, height: height)
-                    .clipShape(CustomCorner(corners: [.topLeft, .topRight], radius: 50))
+                    .clipShape(CustomCorner(corners: [.topLeft, .topRight], radius: 310))
                     .padding(.top, 100)
                 
                 VStack {
