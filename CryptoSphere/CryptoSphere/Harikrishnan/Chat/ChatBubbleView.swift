@@ -15,7 +15,7 @@ struct ChatBubbleView: View {
             VStack(alignment: isCurrentUser ? .trailing : .leading, spacing: 14) {
                 if message.message.hasPrefix("@payment") {
                     VStack(alignment: .leading, spacing: 20) {
-                        HStack(alignment: .center, spacing: 12) {
+                        HStack(alignment: .center, spacing: 20) {
                             // Profile Image
                             
                             if let url = URL(string: String(message.message.split(separator: ",")[4])) {
@@ -43,34 +43,34 @@ struct ChatBubbleView: View {
                             // User Information
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(" \(String(message.message.split(separator: ",")[3]))")
-                                    .font(.headline)
-                                    .fontWeight(.bold)
+                                    .font(.custom("ZohoPuvi-Bold", size: 24))
                                 
                                 Text(" \(String(message.message.split(separator: ",")[2]))")
-                                    .font(.subheadline)
+                                    .font(.custom("ZohoPuvi-Bold", size: 18))
                                     .foregroundColor(.secondary)
                             }
                             
+                            Spacer()
+                            
                             Image(systemName: "checkmark")
                                 .font(.system(size: 26, weight: .bold))
-                                .foregroundColor(.orange)
+                                .foregroundColor(.primaryTheme)
                             
-                            Spacer()
                         }
                         
                         // Message Status and Timestamp
-                        HStack(alignment: .center, spacing: 8) {
+                        HStack(alignment: .center, spacing: 10) {
                             Text(isCurrentUser ? "Sent" : "Received")
-                                .font(.headline)
-                                .foregroundColor(.orange)
+                                .font(.custom("ZohoPuvi-Semibold", size: 18))
+                                .foregroundColor(.primaryTheme)
                             
                             Text(" \(String(message.message.split(separator: ",")[5])) \(String(message.message.split(separator: ",")[2]).replacingOccurrences(of: "USDT", with: ""))")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .font(.custom("ZohoPuvi-Semibold", size: 16))
+                                .foregroundColor(.white)
                         }
                     }
                     .padding(12)
-                    .background(Color.green.opacity(0.1))
+                    .background(Color("GrayButtonColor"))
                     .cornerRadius(12)
                     .frame(maxWidth: maxBubbleWidth, alignment: isCurrentUser ? .trailing : .leading)
                     .offset(x: isMessageVisible ? 0 : (isCurrentUser ? 100 : -100),
@@ -127,9 +127,9 @@ struct ChatBubbleView: View {
     
     private var timestampView: some View {
         Text(formatTimestamp(message.timestamp))
-            .font(.system(size: 10, weight: .medium, design: .monospaced))
+            .font(.system(size: 14, weight: .medium, design: .monospaced))
             .foregroundColor(.gray)
-            .padding(.top, 2)
+            .padding(.top, 1)
             .padding(.horizontal, 4)
     }
     

@@ -30,7 +30,7 @@ class WebSocketManager {
     func connect() async {
         self.username = UserSession.shared?.userName ?? "Krishnan"
         await disconnect()
-        guard let url = URL(string: "wss://spyer.pagekite.me/ws/\(username)") else {
+        guard let url = URL(string: "\(link)/ws/\(username)".replacingOccurrences(of: "https", with: "wss")) else {
             print("❌ Invalid WebSocket URL")
             return
         }
@@ -123,5 +123,19 @@ class WebSocketManager {
         webSocketTask = nil
         print("Disconnected from WebSocket server.")
         isConnected = false
+    }
+}
+
+
+struct Message: Decodable, Encodable, Identifiable, Equatable {
+    var id = UUID()
+    
+    let from: String
+    let to: String
+    let message: String
+    let timestamp: Int
+    
+    private enum CodingKeys: String, CodingKey {
+        case from, to, message, timestamp
     }
 }

@@ -7,12 +7,13 @@
 
 import Foundation
 
+let link = "https://cryptospyer.loca.lt"
 
 class ServerResponce {
     
     static let shared = ServerResponce()
     
-    var baseURL = "https://spyer.pagekite.me"
+    var baseURL = link
     
     func getUsers() async throws -> [User] {
         guard let url = URL(string: "\(baseURL)/get_users") else { return [] }
@@ -111,3 +112,11 @@ struct UserHolding: Decodable, Hashable, Identifiable {
     }
 }
 
+
+struct User: Decodable, Hashable, Encodable {
+    let email: String
+    let username: String
+    let password: String
+    let profilePicture: String
+    
+}
