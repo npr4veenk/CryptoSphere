@@ -36,34 +36,31 @@ class PortfolioView: UIView {
     }()
 
     private let withdrawButton: UIButton = {
-        let button = UIButton(type: .system)
-        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .bold)
-        let image = UIImage(systemName: "arrow.down.circle.fill", withConfiguration: config)
-        button.setImage(image, for: .normal)
-        button.setTitle("Withdraw", for: .normal)
-        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10)
-        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-        button.tintColor = .white
-        button.layer.cornerRadius = 20
-        button.backgroundColor = UIColor(white: 1, alpha: 0.1)
+        var config = UIButton.Configuration.filled()
+        config.image = UIImage(systemName: "arrow.down.circle.fill")
+        config.imagePadding = 10
+        config.imagePlacement = .leading
+        config.baseForegroundColor = .white
+        config.background.backgroundColor = UIColor(white: 1, alpha: 0.1)
+        config.cornerStyle = .medium
+        config.title = "Withdraw"
+        
+        let button = UIButton(configuration: config, primaryAction: nil)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         return button
     }()
     
     private let depositButton: UIButton = {
-        let button = UIButton(type: .system)
-        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .bold)
-        let image = UIImage(systemName: "arrow.up.circle.fill", withConfiguration: config)
-        button.setImage(image, for: .normal)
-        button.setTitle("Deposit", for: .normal)
-        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10)
-        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
-        button.tintColor = .white
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
-        button.tintColor = .white
-        button.layer.cornerRadius = 20
-        button.backgroundColor = UIColor(white: 1, alpha: 0.1)
+        var config = UIButton.Configuration.filled()
+        config.image = UIImage(systemName: "arrow.up.circle.fill")
+        config.imagePadding = 10
+        config.imagePlacement = .leading
+        config.baseForegroundColor = .white
+        config.background.backgroundColor = UIColor(white: 1, alpha: 0.1)
+        config.cornerStyle = .medium
+        config.title = "Deposit"
+        
+        let button = UIButton(configuration: config, primaryAction: nil)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         return button
     }()

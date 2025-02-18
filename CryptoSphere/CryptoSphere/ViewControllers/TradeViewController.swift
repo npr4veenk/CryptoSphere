@@ -50,7 +50,7 @@ class TradeViewController: UIViewController {
     private var tradeTitleView: UILabel = {
         let label = UILabel()
         label.textColor = .font
-        label.font = Fonts.puviFont("Medium", 18)
+        label.font = Fonts.getPuviFont("Medium", 18)
         label.text = "TRADE"
         label.textAlignment = .center
         label.sizeToFit()
@@ -115,7 +115,7 @@ class TradeViewController: UIViewController {
         let items = ["1D", "5D", "1M", "6M", "1Y", "All"]
         let control = UISegmentedControl(items: items)
         control.selectedSegmentIndex = 0
-        control.selectedSegmentTintColor = .primary
+        control.selectedSegmentTintColor = .primaryTheme
         control.setTitleTextAttributes(
             [.foregroundColor: UIColor.font], for: .normal)
         control.setTitleTextAttributes(
@@ -173,7 +173,7 @@ class TradeViewController: UIViewController {
         button.setTitle("Buy", for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .primary
+        button.backgroundColor = .primaryTheme
         button.layer.cornerRadius = 25
         button.translatesAutoresizingMaskIntoConstraints = false
         return button

@@ -9,7 +9,7 @@ class UIKitViewController: UIViewController {
         button.setTitle("Hello", for: .normal)
         button.setTitleColor(.systemBlue, for: .normal)
         // Correctly reference `button` instead of `changePageButon`
-        button.addTarget(self, action: #selector(changePage), for: .touchUpInside)
+        button.addTarget(UIKitViewController.self, action: #selector(changePage), for: .touchUpInside)
         return button
     }()
     

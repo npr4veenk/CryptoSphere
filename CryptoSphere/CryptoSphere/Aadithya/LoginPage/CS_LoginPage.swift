@@ -7,11 +7,10 @@
 
 import SwiftUI
 
-@main
 struct CS_LoginPageApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            Login()
         }
     }
 }

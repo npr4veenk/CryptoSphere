@@ -5,7 +5,7 @@ class Fonts{
     static let zohoPuviMediumFont = UIFont(name: "ZohoPuvi-Medium", size: 20)
     static let zohoPuviBoldFont = UIFont(name: "ZohoPuvi-Bold", size: 20)
     
-    static func puviFont(_ type:String, _ size:Int = 20) -> UIFont {
+    static func getPuviFont(_ type:String, _ size:Int = 20) -> UIFont {
         return UIFont(name: "ZohoPuvi-\(type.capitalized)", size: CGFloat(size))
             ?? .boldSystemFont(ofSize: CGFloat(size))
     }
