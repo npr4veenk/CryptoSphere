@@ -50,10 +50,10 @@ class LivePriceResponse{
             URLQueryItem(name: "category", value: "spot"),
             URLQueryItem(name: "symbol", value: coinName.uppercased())
         ]
-
         guard let url = urlComponents.url else {
             throw CoinError.invalidURL
         }
+        
         let (data, response) = try await URLSession.shared.data(from: url)
         
         guard let httpResponse = response as? HTTPURLResponse else {

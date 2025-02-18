@@ -5,15 +5,15 @@ class PortfolioView: UIView {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "YOUR PORTFOLIO"
-        label.font = .systemFont(ofSize: 14, weight: .medium)
-        label.textColor = .lightGray
+        label.font = Fonts.getPuviFont("medium", 14)
+        label.textColor = .secondaryFont
         return label
     }()
     
     private let balanceLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 32, weight: .bold)
-        label.textColor = .white
+        label.font = Fonts.getPuviFont("bold", 32)
+        label.textColor = .font
         label.adjustsFontSizeToFitWidth = true
         label.minimumScaleFactor = 0.7
         return label
@@ -21,47 +21,47 @@ class PortfolioView: UIView {
     
     private let profitLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 16, weight: .medium)
-        label.textColor = .white
+        label.font = Fonts.getPuviFont("medium", 14)
+        label.textColor = .font
         label.textAlignment = .right
         return label
     }()
     
     private let percentageLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 16, weight: .medium)
+        label.font = Fonts.getPuviFont("medium", 16)
         label.textColor = .green
         label.textAlignment = .right
         return label
     }()
 
     private let withdrawButton: UIButton = {
-        var config = UIButton.Configuration.filled()
-        config.image = UIImage(systemName: "arrow.down.circle.fill")
-        config.imagePadding = 10
-        config.imagePlacement = .leading
-        config.baseForegroundColor = .white
-        config.background.backgroundColor = UIColor(white: 1, alpha: 0.1)
-        config.cornerStyle = .medium
-        config.title = "Withdraw"
-        
-        let button = UIButton(configuration: config, primaryAction: nil)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        let button = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .bold)
+        let image = UIImage(systemName: "arrow.down.circle.fill", withConfiguration: config)
+        button.setImage(image, for: .normal)
+        button.setTitle("Withdraw", for: .normal)
+        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10)
+        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
+        button.titleLabel?.font = Fonts.getPuviFont("medium", 16)
+        button.tintColor = .font
+        button.layer.cornerRadius = 20
+        button.backgroundColor = .font.withAlphaComponent(0.2)
         return button
     }()
     
     private let depositButton: UIButton = {
-        var config = UIButton.Configuration.filled()
-        config.image = UIImage(systemName: "arrow.up.circle.fill")
-        config.imagePadding = 10
-        config.imagePlacement = .leading
-        config.baseForegroundColor = .white
-        config.background.backgroundColor = UIColor(white: 1, alpha: 0.1)
-        config.cornerStyle = .medium
-        config.title = "Deposit"
-        
-        let button = UIButton(configuration: config, primaryAction: nil)
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        let button = UIButton(type: .system)
+        let config = UIImage.SymbolConfiguration(pointSize: 14, weight: .bold)
+        let image = UIImage(systemName: "arrow.up.circle.fill", withConfiguration: config)
+        button.setImage(image, for: .normal)
+        button.setTitle("Deposit", for: .normal)
+        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10)
+        button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
+        button.titleLabel?.font = Fonts.getPuviFont("medium", 16)
+        button.tintColor = .font
+        button.layer.cornerRadius = 20
+        button.backgroundColor = .font.withAlphaComponent(0.2)
         return button
     }()
     
@@ -76,7 +76,7 @@ class PortfolioView: UIView {
     }
     
     private func setupView() {
-        backgroundColor = UIColor(white: 1, alpha: 0.1)
+        backgroundColor = .font.withAlphaComponent(0.1)
         layer.cornerRadius = 20
         clipsToBounds = true
         
@@ -109,13 +109,13 @@ class PortfolioView: UIView {
             
             withdrawButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 15),
             withdrawButton.topAnchor.constraint(equalTo: balanceLabel.bottomAnchor, constant: 10),
-            withdrawButton.widthAnchor.constraint(equalToConstant: 160),
-            withdrawButton.heightAnchor.constraint(equalToConstant: 40),
+            withdrawButton.widthAnchor.constraint(equalToConstant: 172),
+            withdrawButton.heightAnchor.constraint(equalToConstant: 38),
             
             depositButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -15),
             depositButton.topAnchor.constraint(equalTo: balanceLabel.bottomAnchor, constant: 10),
-            depositButton.widthAnchor.constraint(equalToConstant: 160),
-            depositButton.heightAnchor.constraint(equalToConstant: 40),
+            depositButton.widthAnchor.constraint(equalToConstant: 172),
+            depositButton.heightAnchor.constraint(equalToConstant: 38),
             
             bottomAnchor.constraint(equalTo: withdrawButton.bottomAnchor, constant: 15)
         ])
@@ -135,7 +135,7 @@ class PortfolioViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black
+        view.backgroundColor = .background
         let portfolioView = PortfolioView()
         portfolioView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(portfolioView)
