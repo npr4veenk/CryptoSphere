@@ -7,11 +7,12 @@
 
 import UIKit
 import SwiftUI
+import SwiftData
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
+    var modelContainer: ModelContainer?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
@@ -63,10 +64,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let fontAttributes = [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 11)]
         UITabBarItem.appearance().setTitleTextAttributes(fontAttributes, for: .normal)
 
-        window.rootViewController = UIHostingController(rootView: Login())
+
 //        window.rootViewController = tabBarController
+        window.rootViewController = UIHostingController(rootView: Login().modelContainer(for: UserSession.self))
         self.window = window
         window.makeKeyAndVisible()
+
+        
     }
 
 

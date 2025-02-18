@@ -17,10 +17,67 @@ var slideSheet = false
 struct Login: View {
     
     @Query private var sessions: [UserSession]
-    @Environment(\.modelContext) private var modelContext
     @Environment(\.globalViewModel) private var globalViewModel
     @State var currentSession: UserSession = UserSession()
     @Namespace var profileAnimation
+    
+    var body: some View {
+        if !currentSession.isSignedIn {
+            AnyView(LoginBackgroundView(session: $currentSession))
+                .onAppear { restoreSession() }
+        } else {
+            AllUsersListView(profileAnimation: profileAnimation, onSelectUser: { user, _ in
+                withAnimation{
+                    AnyView(ChatView(toUser: user, profileAnimation: profileAnimation))
+                }
+            })
+            .onAppear {
+                Task{
+                    await ServerResponce.shared.addUser(user: globalViewModel.session)
+                }
+            }
+        }
+    }
+    
+    private func restoreSession() {
+        if sessions.isEmpty {
+            return
+        }
+        currentSession = sessions.last!
+        UserSession.shared = currentSession
+        globalViewModel.session = User(email: currentSession.emailAddress ?? "", username: currentSession.userName ?? "", password: "Google Sign In", profilePicture: currentSession.profileImageURL ?? "")
+    }
+    
+}
+
+struct OnboardView: View{
+    
+    let imageName : String
+    let title : String
+    let description : String
+    
+    var body : some View{
+        VStack(spacing: 20){
+            Image(systemName: imageName)
+                .resizable()
+                .frame(width: 100, height: 100)
+                .foregroundColor(.primaryTheme)
+            
+            Text(title)
+                .font(.custom("ZohoPuvi-ExtraBold", size: 28))
+            
+            Text(description)
+                .font(.custom("Rockwell", size: 20))
+                .lineSpacing(5)
+                .multilineTextAlignment(.center)
+                .foregroundColor(.white)
+        }
+        .padding(.horizontal, 40)
+    }
+}
+
+
+struct LoginBackgroundView: View {
     
     @State private var currentOffset: CGFloat = 0
     @GestureState private var gestureOffset: CGFloat = 0
@@ -31,188 +88,157 @@ struct Login: View {
     @State private var slideInitial = 140.0
     @State private var infoOffset = 50.0
     
+    @Binding var session: UserSession
+    @Environment(\.globalViewModel) private var globalViewModel
+    @Environment(\.modelContext) private var modelContext
+    
     let sentences = [
         "You're only a few steps away",
         "from CryptoSphere"
     ]
     
-    var body: some View {
-        VStack{
-            if !currentSession.isSignedIn {
-                ZStack {
-                    IntroPlayerWrapper()
-                        .ignoresSafeArea()
-                        .blur(radius: getBlurRadius())
+    var body: some View{
+        ZStack {
+            IntroPlayerWrapper()
+                .ignoresSafeArea()
+                .blur(radius: getBlurRadius())
+            
+            ZStack {
+                Color(.grayButton)
+                    .frame(width: width, height: height)
+                    .clipShape(CustomCorner(corners: [.topLeft, .topRight], radius: 30))
+                    .padding(.top, 100)
+                
+                VStack {
+                    Capsule()
+                        .fill(.primaryTheme)
+                        .frame(width: 70, height: 12)
+                        .padding(.top, 120)
                     
-                    ZStack {
-                        Color(.grayButton)
-                            .frame(width: width, height: height)
-                            .clipShape(CustomCorner(corners: [.topLeft, .topRight], radius: 30))
-                            .padding(.top, 100)
+                    VStack(spacing: 10) {
+                        ForEach(sentences.indices, id: \.self) { index in
+                            Text(sentences[index])
+                                .font(.custom("ZohoPuvi-Bold", size: 24))
+                                .foregroundStyle(.white)
+                                .opacity(visibleCount > index ? 1 : 0)
+                        }
+                    }
+                    .padding(.top, 40)
+                    
+                    Button(action: {
+                        slideSheet = true
+                        showSheet()
+                    }) {
+                        Text("Get Started")
+                            .font(.custom("ZohoPuvi-Bold", size: 24))
+                            .foregroundColor(.white)
+                            .frame(width: 250, height: 50)
+                    }
+                    .background(.primaryTheme)
+                    .clipShape(RoundedRectangle(cornerRadius: 65))
+                    .offset(y: 40)
+                    .scaleEffect(scale)
+                    
+                    VStack{
+                        Page()
+                            .offset(y : infoOffset)
                         
-                        VStack {
-                            Capsule()
-                                .fill(.primaryTheme)
-                                .frame(width: 70, height: 12)
-                                .padding(.top, 120)
-                            
-                            VStack(spacing: 10) {
-                                ForEach(sentences.indices, id: \.self) { index in
-                                    Text(sentences[index])
-                                        .font(.custom("ZohoPuvi-Bold", size: 24))
-                                        .foregroundStyle(.white)
-                                        .opacity(visibleCount > index ? 1 : 0)
-                                }
-                            }
-                            .padding(.top, 40)
-                            
-                            Button(action: {
-                                slideSheet = true
-                                showSheet()
-                            }) {
-                                Text("Get Started")
-                                    .font(.custom("ZohoPuvi-Bold", size: 24))
-                                    .foregroundColor(.white)
-                                    .frame(width: 250, height: 50)
-                            }
-                            .background(.primaryTheme)
-                            .clipShape(RoundedRectangle(cornerRadius: 65))
-                            .offset(y: 40)
-                            .scaleEffect(scale)
-                            
-                            VStack{
-                                Page()
-                                    .offset(y : infoOffset)
+                        Button(action: {}) {
+                            HStack(spacing: 15){
+                                Image("GoogleIcon")
+                                    .resizable()
+                                    .frame(width: 35, height: 35)
                                 
-                                Button(action: {}) {
-                                    HStack(spacing: 15){
-                                        Image("GoogleIcon")
-                                            .resizable()
-                                            .frame(width: 35, height: 35)
+                                Text("Sign in with Google")
+                                    .font(.custom("ZohoPuvi-ExtraBold", size: 22))
+                                    .foregroundColor(.grayButton)
+                                    .onTapGesture {
+                                        let targetSession = UserSession(isSignedIn: false)
+                                        modelContext.insert(targetSession)
                                         
-                                        Text("Sign in with Google")
-                                            .font(.custom("ZohoPuvi-ExtraBold", size: 22))
-                                            .foregroundColor(.grayButton)
-                                            .onTapGesture {
-                                                let targetSession = UserSession(isSignedIn: false)
-                                                modelContext.insert(targetSession)
-                                                
-                                                GIDSignIn.sharedInstance.signIn(withPresenting: getRootViewController()) { result, error in
-                                                    guard let user = result?.user, error == nil else {
-                                                        print("Sign in error: \(String(describing: error))")
-                                                        return
-                                                    }
-                                                    
-                                                    targetSession.isSignedIn = true
-                                                    targetSession.userName = user.profile?.name
-                                                    targetSession.emailAddress = user.profile?.email
-                                                    targetSession.profileImageURL = user.profile?.imageURL(withDimension: 100)?.absoluteString
-                                                    UserSession.shared = targetSession
-                                                    currentSession = targetSession
-                                                    
-                                                    globalViewModel.session = User(email: targetSession.emailAddress ?? "", username: targetSession.userName ?? "", password: "Google Sign In", profilePicture: targetSession.profileImageURL ?? "")
-                                                }
+                                        GIDSignIn.sharedInstance.signIn(withPresenting: getRootViewController()) { result, error in
+                                            guard let user = result?.user, error == nil else {
+                                                print("Sign in error: \(String(describing: error))")
+                                                return
                                             }
+                                            
+                                            targetSession.isSignedIn = true
+                                            targetSession.userName = user.profile?.name
+                                            targetSession.emailAddress = user.profile?.email
+                                            targetSession.profileImageURL = user.profile?.imageURL(withDimension: 100)?.absoluteString
+                                            
+                                            UserSession.shared = targetSession
+                                            globalViewModel.session = User(email: targetSession.emailAddress ?? "", username: targetSession.userName ?? "", password: "Google Sign In", profilePicture: targetSession.profileImageURL ?? "")
+                                            session = targetSession
+                                        }
                                     }
-                                    .frame(width: 330, height: 50)
-                                }
-                                .background(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                .offset(y:-40)
-                                .scaleEffect(secScale)
                             }
+                            .frame(width: 330, height: 50)
+                        }
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .offset(y:-40)
+                        .scaleEffect(secScale)
+                    }
+                    
+                    Button(action: {}) {
+                        HStack(spacing: 20){
+                            Image(systemName: "apple.logo")
+                                .resizable()
+                                .frame(width: 30, height: 35)
+                                .foregroundStyle(.black)
                             
-                            Button(action: {}) {
-                                HStack(spacing: 20){
-                                    Image(systemName: "apple.logo")
-                                        .resizable()
-                                        .frame(width: 30, height: 35)
-                                        .foregroundStyle(.black)
-                                    
-                                    Text("Sign in with Apple")
-                                        .font(.custom("ZohoPuvi-ExtraBold", size: 22))
-                                        .foregroundColor(.grayButton)
-                                }
-                                .frame(width: 330, height: 50)
-                                
-                            }
-                            .background(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .offset(y:-20)
-                            .scaleEffect(secScale)
+                            Text("Sign in with Apple")
+                                .font(.custom("ZohoPuvi-ExtraBold", size: 22))
+                                .foregroundColor(.grayButton)
                         }
-                        .frame(maxHeight: .infinity, alignment: .top)
+                        .frame(width: 330, height: 50)
+                        
                     }
-                    .offset(y: height - slideInitial)
-                    .offset(y: -currentOffset > height - 380 ? -(height - 380) : currentOffset)
-                    .gesture(
-                        DragGesture()
-                            .updating($gestureOffset) { value, out, _ in
-                                out = value.translation.height
-                                onChange()
-                            }
-                            .onEnded { _ in
-                                showSheet()
-                            }
-                    )
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .offset(y:-20)
+                    .scaleEffect(secScale)
                 }
-                .onAppear {
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
-                        withAnimation(.easeOut(duration: 0.5)){
-                            slideInitial = 380
-                        }
+                .frame(maxHeight: .infinity, alignment: .top)
+            }
+            .offset(y: height - slideInitial)
+            .offset(y: -currentOffset > height - 380 ? -(height - 380) : currentOffset)
+            .gesture(
+                DragGesture()
+                    .updating($gestureOffset) { value, out, _ in
+                        out = value.translation.height
+                        onChange()
                     }
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-                        for i in 0..<sentences.count {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + (Double(i) * 0.8)) {
-                                withAnimation(.easeOut(duration: 1.2)) {
-                                    visibleCount += 1
-                                }
-                            }
-                        }
-                        
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
-                            withAnimation(.easeOut(duration: 0.2)) {
-                                scale = 1
-                            }
+                    .onEnded { _ in
+                        showSheet()
+                    }
+            )
+        }
+        .onAppear {
+            
+            DispatchQueue.main.asyncAfter(deadline: .now()+0.3) {
+                withAnimation(.easeOut(duration: 0.5)){
+                    slideInitial = 380
+                }
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                for i in 0..<sentences.count {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + (Double(i) * 0.8)) {
+                        withAnimation(.easeOut(duration: 1.2)) {
+                            visibleCount += 1
                         }
                     }
                 }
-            } else {
-                AllUsersListView(profileAnimation: profileAnimation, onSelectUser: { user, _ in
-                    withAnimation{
-                        AnyView(ChatView(toUser: user, profileAnimation: profileAnimation))
-                    }
-                })
-                .onAppear {
-                    Task{
-                        await ServerResponce.shared.addUser(user: globalViewModel.session)
+                
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        scale = 1
                     }
                 }
             }
-        }
-        .onAppear { restoreSession() }
-    }
-    
-    private func restoreSession() {
-        if sessions.isEmpty {
-            return
-        }
-        
-        let session = UserSession()
-        
-        GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
-            session.isSignedIn = user != nil && error == nil
-            session.userName = user?.profile?.name
-            session.emailAddress = user?.profile?.email
-            session.profileImageURL = user?.profile?.imageURL(withDimension: 100)?.absoluteString
-            currentSession = session
-            UserSession.shared = session
-            
-            globalViewModel.session = User(email: session.emailAddress ?? "", username: session.userName ?? "", password: "Google Sign In", profilePicture: session.profileImageURL ?? "")
         }
     }
     
@@ -225,6 +251,7 @@ struct Login: View {
     }
     
     func onChange() {
+        print(2)
         DispatchQueue.main.async {
             self.currentOffset = gestureOffset + lastOffset
         }
@@ -299,33 +326,8 @@ struct Page: View {
     }
 }
 
-struct OnboardView: View{
-    
-    let imageName : String
-    let title : String
-    let description : String
-    
-    var body : some View{
-        VStack(spacing: 20){
-            Image(systemName: imageName)
-                .resizable()
-                .frame(width: 100, height: 100)
-                .foregroundColor(.primaryTheme)
-            
-            Text(title)
-                .font(.custom("ZohoPuvi-ExtraBold", size: 28))
-            
-            Text(description)
-                .font(.custom("Rockwell", size: 20))
-                .lineSpacing(5)
-                .multilineTextAlignment(.center)
-                .foregroundColor(.white)
-        }
-        .padding(.horizontal, 40)
-    }
-}
-
 
 #Preview {
-    ContentView()
+    Login()
+        .modelContainer(for: UserSession.self)
 }

@@ -175,7 +175,7 @@ struct SymbolWithNameView: View {
         }
         
         let before = Text(String(username[..<range.lowerBound]))
-        let highlighted = Text(String(username[range])).foregroundColor(Color("PrimaryColor"))
+        let highlighted = Text(String(username[range])).foregroundColor(Color("primaryTheme"))
         let after = Text(String(username[range.upperBound...]))
         
         return before + highlighted + after

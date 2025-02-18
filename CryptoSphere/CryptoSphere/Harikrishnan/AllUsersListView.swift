@@ -250,9 +250,9 @@ struct ChatInputView: View {
                         .font(.system(size: 16, weight: .semibold)) // Slightly larger & bolder text
                         .padding(.horizontal, 14)
                         .padding(.vertical, 10)
-                        .background(Color("PrimaryColor").opacity(0.2), in: RoundedRectangle(cornerRadius: 8)) //
+                        .background(Color("primaryTheme").opacity(0.2), in: RoundedRectangle(cornerRadius: 8)) //
                         .foregroundColor(Color("FontColor"))
-                        .shadow(color: Color("PrimaryColor").opacity(0.1), radius: 4, x: 0, y: 2) // Adds a subtle
+                        .shadow(color: Color("primaryTheme").opacity(0.1), radius: 4, x: 0, y: 2) // Adds a subtle
                 }
                 .transition(.move(edge: .leading))
                 .sheet(isPresented: $isSheetPresented) { // Sheet content
@@ -275,7 +275,7 @@ struct ChatInputView: View {
             // Send Button
             Button(action: onSend) {
                 Image(systemName: "paperplane.fill")
-                    .foregroundColor(messageText.isEmpty ? .gray : Color("PrimaryColor"))
+                    .foregroundColor(messageText.isEmpty ? .gray : Color("primaryTheme"))
                     .padding(12)
                     .background(messageText.isEmpty ? Color.gray.opacity(0.1) : Color.orange.opacity(0.1), in: Circle())
             }
