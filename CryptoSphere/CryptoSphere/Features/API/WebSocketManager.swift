@@ -29,7 +29,7 @@ class WebSocketManager: ObservableObject {
     // Connect to WebSocket server
     func connect() async {
         await disconnect()
-        guard let url = URL(string: "wss://snake-loving-bear.ngrok-free.app/ws/\(username)") else {
+        guard let url = URL(string: "wss://cryptospyer.loca.lt/ws/\(username)") else {
             print("❌ Invalid WebSocket URL")
             return
         }

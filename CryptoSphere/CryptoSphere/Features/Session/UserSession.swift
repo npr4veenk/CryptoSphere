@@ -10,7 +10,7 @@ import SwiftData
 
 @Model
 class UserSession {
-    static var shared: UserSession? = UserSession(isSignedIn: true, userName: "Krishnan")
+    static var shared: UserSession? = UserSession(isSignedIn: true, userName: preview)
     
     var isSignedIn: Bool
     var userName: String?
@@ -23,3 +23,5 @@ class UserSession {
         self.profileImageURL = profileImageURL
     }
 }
+
+let preview = "john"

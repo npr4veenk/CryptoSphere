@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		9C5A6B522D5F484D008011F4 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 9C5A6B512D5F484D008011F4 /* GoogleSignIn */; };
+		9C5A6B542D5F484D008011F4 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 9C5A6B532D5F484D008011F4 /* GoogleSignInSwift */; };
+		9C5A6B592D636E69008011F4 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 9C5A6B582D636E69008011F4 /* Kingfisher */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		11C8BCF82D4B38FB00E9E96A /* CryptoSphere.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CryptoSphere.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +42,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9C5A6B592D636E69008011F4 /* Kingfisher in Frameworks */,
+				9C5A6B522D5F484D008011F4 /* GoogleSignIn in Frameworks */,
+				9C5A6B542D5F484D008011F4 /* GoogleSignInSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +87,9 @@
 			);
 			name = CryptoSphere;
 			packageProductDependencies = (
+				9C5A6B512D5F484D008011F4 /* GoogleSignIn */,
+				9C5A6B532D5F484D008011F4 /* GoogleSignInSwift */,
+				9C5A6B582D636E69008011F4 /* Kingfisher */,
 			);
 			productName = CryptoSphere;
 			productReference = 11C8BCF82D4B38FB00E9E96A /* CryptoSphere.app */;
@@ -107,6 +119,10 @@
 			);
 			mainGroup = 11C8BCEF2D4B38FB00E9E96A;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				9C5A6B502D5F484D008011F4 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				9C5A6B572D636E69008011F4 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 11C8BCF92D4B38FB00E9E96A /* Products */;
 			projectDirPath = "";
@@ -145,6 +161,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7KYJ8Z95NY;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CryptoSphere/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -172,6 +189,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7KYJ8Z95NY;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CryptoSphere/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -333,6 +351,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		9C5A6B502D5F484D008011F4 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
+		9C5A6B572D636E69008011F4 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		9C5A6B512D5F484D008011F4 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9C5A6B502D5F484D008011F4 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		9C5A6B532D5F484D008011F4 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9C5A6B502D5F484D008011F4 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		9C5A6B582D636E69008011F4 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 9C5A6B572D636E69008011F4 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 11C8BCF02D4B38FB00E9E96A /* Project object */;
 }

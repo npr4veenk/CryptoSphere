@@ -12,21 +12,72 @@ struct ChatBubbleView: View {
         HStack {
             if isCurrentUser { Spacer() }
             
-            VStack(alignment: isCurrentUser ? .trailing : .leading, spacing: 4) {
-                if message.message.hasPrefix("{payment}") {
-                    VStack {
-                        Text(isCurrentUser ? "Payment Sent" : "Payment Received")
-                            .font(.headline)
-                            .foregroundColor(.green)
+            VStack(alignment: isCurrentUser ? .trailing : .leading, spacing: 14) {
+                if message.message.hasPrefix("@payment") {
+                    VStack(alignment: .leading, spacing: 20) {
+                        HStack(alignment: .center, spacing: 12) {
+                            // Profile Image
+                            
+                            if let url = URL(string: String(message.message.split(separator: ",")[4])) {
+                                AsyncImage(url: url) { phase in
+                                    switch phase {
+                                    case .empty:
+                                        ProgressView()
+                                            .progressViewStyle(CircularProgressViewStyle())
+                                            .frame(width: 50, height: 50)
+                                    case .success(let image):
+                                        image.resizable()
+                                            .scaledToFill()
+                                    case .failure:
+                                        Image(systemName: "person.circle.fill")
+                                            .resizable()
+                                            .foregroundColor(.secondary)
+                                    @unknown default:
+                                        EmptyView()
+                                    }
+                                }
+                                .frame(width: 40, height: 40)
+                                .clipShape(Circle())
+                            }
+                            
+                            // User Information
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(" \(String(message.message.split(separator: ",")[3]))")
+                                    .font(.headline)
+                                    .fontWeight(.bold)
+                                
+                                Text(" \(String(message.message.split(separator: ",")[2]))")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 26, weight: .bold))
+                                .foregroundColor(.orange)
+                            
+                            Spacer()
+                        }
+                        
+                        // Message Status and Timestamp
+                        HStack(alignment: .center, spacing: 8) {
+                            Text(isCurrentUser ? "Sent" : "Received")
+                                .font(.headline)
+                                .foregroundColor(.orange)
+                            
+                            Text(" \(String(message.message.split(separator: ",")[5])) \(String(message.message.split(separator: ",")[2]).replacingOccurrences(of: "USDT", with: ""))")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                        }
                     }
                     .padding(12)
                     .background(Color.green.opacity(0.1))
                     .cornerRadius(12)
                     .frame(maxWidth: maxBubbleWidth, alignment: isCurrentUser ? .trailing : .leading)
-                    .offset(x: isMessageVisible ? 0 : (isCurrentUser ? 200 : -200),
-                            y: isMessageVisible ? 0 : (isCurrentUser ? 140 : -140))
+                    .offset(x: isMessageVisible ? 0 : (isCurrentUser ? 100 : -100),
+                            y: isMessageVisible ? 0 : (isCurrentUser ? 40 : -40))
                     .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
                     .opacity(isMessageVisible ? 1 : 0)
+                    
                 } else {
                     Text(message.message)
                         .font(.system(.body, design: .rounded))
@@ -36,14 +87,15 @@ struct ChatBubbleView: View {
                         .background(messageBackground)
                         .clipShape(RoundedCornerShape(radius: 18, corners: isCurrentUser ? [.topLeft, .bottomLeft, .bottomRight] : [.topRight, .bottomLeft, .bottomRight]))
                         .frame(maxWidth: maxBubbleWidth, alignment: isCurrentUser ? .trailing : .leading)
-                        .offset(x: isMessageVisible ? 0 : (isCurrentUser ? 200 : -200),
-                                y: isMessageVisible ? 0 : (isCurrentUser ? 140 : -140))
+                        .offset(x: isMessageVisible ? 0 : (isCurrentUser ? 60 : -60),
+                                y: isMessageVisible ? 0 : (isCurrentUser ? 10 : -10))
                         .shadow(color: Color.black.opacity(0.1), radius: 3, x: 0, y: 2)
                         .opacity(isMessageVisible ? 1 : 0)
                 }
                 
                 timestampView
-                    .offset(x: isMessageVisible ? 0 : (isCurrentUser ? 300 : -300))
+                    .offset(x: isMessageVisible ? 0 : (isCurrentUser ? 20 : -40),
+                            y: isMessageVisible ? 0 : (isCurrentUser ? 10 : -10))
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 4)
@@ -82,7 +134,7 @@ struct ChatBubbleView: View {
     }
     
     private func formatTimestamp(_ timestamp: Int) -> String {
-        let date = Date(timeIntervalSince1970: TimeInterval(timestamp))
+        let date = Date(timeIntervalSinceNow: TimeInterval(timestamp))
         let formatter = DateFormatter()
         formatter.dateFormat = "HH:mm"
         return formatter.string(from: date)
@@ -109,10 +161,10 @@ struct RoundedCornerShape: Shape {
             message: Message(
                 from: "user1",
                 to: "user2",
-                message: "{payment}Hello! This is a sample message",
-                timestamp: Int(Date().timeIntervalSince1970)
+                message: "@payment,success,BTCUSDT,Bitcoin,https://cryptologos.cc/logos/bitcoin-btc-logo.png,0.1",
+                timestamp: Int(Date().timeIntervalSinceNow)
             ),
-            isCurrentUser: false
+            isCurrentUser: true
         )
         
         ChatBubbleView(
@@ -120,7 +172,7 @@ struct RoundedCornerShape: Shape {
                 from: "user2",
                 to: "user1",
                 message: "Hi! This is my reply",
-                timestamp: Int(Date().timeIntervalSince1970)
+                timestamp: Int(Date().timeIntervalSinceNow)
             ),
             isCurrentUser: true
         )

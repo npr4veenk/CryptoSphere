@@ -7,6 +7,7 @@
 
 import Foundation
 import Observation
+import SwiftUI
 
 @Observable
 class GlobalViewModel {
@@ -14,7 +15,17 @@ class GlobalViewModel {
     var selectedUser: User = User(email: " ", username: "", password: "" , profilePicture: "")
     var wsManager = WebSocketManager()
     
-    var session: User = User(email: " ", username: "Krishnan", password: "" , profilePicture: "")
+    var session: User = User(email: " ", username: preview, password: "" , profilePicture: "")
 }
 
 
+struct GlobalViewModelKey: EnvironmentKey {
+    static var defaultValue: GlobalViewModel = GlobalViewModel()  // Default empty instance
+}
+
+extension EnvironmentValues {
+    var globalViewModel: GlobalViewModel {
+        get { self[GlobalViewModelKey.self] }
+        set { self[GlobalViewModelKey.self] = newValue }
+    }
+}

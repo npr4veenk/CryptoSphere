@@ -7,7 +7,7 @@ struct SendView: View {
     @State private var isShowingScanner: Bool = false
     @State private var isConfirmingTransfer: Bool = false
     
-    @Environment(GlobalViewModel.self) var globalViewModel
+    @Environment(\.globalViewModel) var globalViewModel
     
     var body: some View {
         VStack(spacing: 20) {
@@ -154,7 +154,7 @@ struct SendView: View {
         print("Transferring \(amount) \(userHolding.coin.coinSymbol) to \(transferAddress)")
         
         
-        await globalViewModel.wsManager.sendMessage(to: " ", message: "{payment},\(globalViewModel.selectedCoin.coin.coinSymbol),\(amount),\(transferAddress)")
+        await globalViewModel.wsManager.sendMessage(to: " ", message: "@payment,\(globalViewModel.selectedCoin.coin.id),\(amount),\(transferAddress)")
     }
 }
 
@@ -194,5 +194,4 @@ class ScannerViewController: UIViewController {
         ),
         quantity: 0.5
     ))
-    .environment(GlobalViewModel())
 }

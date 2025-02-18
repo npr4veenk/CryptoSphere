@@ -15,15 +15,16 @@ struct WalletView: View {
     @State private var searchTextsheet: String = ""
     @State private var isSendActionSheetPresented = false
     @State private var isReceiveActionSheetPresented = false
-    @Environment(GlobalViewModel.self) private var globalViewModel
+    @Environment(\.globalViewModel) private var globalViewModel
     
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
                 walletData()
                     .onAppear { fillcoins() }
-                UserCoinListView(coins: coins, allowSelection: false, navigationDestination: { _ in AnyView(Text(""))})
-                Spacer()
+                AllCoinsListView(isUserHoldingCoins: true, onSelectCoin: { userHolding in
+                    AnyView(SendView(userHolding: userHolding as! UserHolding))
+                })
             }
             .refreshable { fillcoins() }
         }
@@ -53,15 +54,17 @@ struct WalletView: View {
                     }
                     .padding()
                     .frame(maxWidth: .infinity)
-                    .background(.black.gradient)
-                    .foregroundColor(.white)
+                    .background(Color("PrimaryColor"))
+                    .foregroundColor(.font)
                     .cornerRadius(12)
                 }
                 
                 Button(action: { isReceiveActionSheetPresented = true }) {
                     HStack {
                         Image(systemName: "arrow.down.to.line.alt")
+                           
                         Text("Receive")
+
                     }
                     .padding()
                     .frame(maxWidth: .infinity)
@@ -72,16 +75,18 @@ struct WalletView: View {
             }
         }
         .sheet(isPresented: $isSendActionSheetPresented) {
-            UserCoinListView(coins: coins, allowSelection: true, navigationDestination: { coin in AnyView(SendView(userHolding: coin as! UserHolding)) })
-                .padding()
+            AllCoinsListView(isUserHoldingCoins: true, onSelectCoin: { userHolding in
+                AnyView(SendView(userHolding: userHolding as! UserHolding))
+            })
+            .padding()
             .presentationDragIndicator(.visible)
             .navigationTitle("Select Coin to Receive")
         }
         
         .sheet(isPresented: $isReceiveActionSheetPresented) {
-            AllCoinsListView(
-                onSelectCoin: { coin in AnyView(ReceiveView(coin: coin )) }
-            )
+            AllCoinsListView(isUserHoldingCoins: true, onSelectCoin: { userHolding in
+                AnyView(SendView(userHolding: userHolding as! UserHolding))
+            })
             .presentationDragIndicator(.visible)
         }
         
@@ -95,12 +100,11 @@ struct WalletView: View {
                 for i in coins{
                     let price = try await LivePriceResponse().fetchPrice(coinName: i.coin.coinSymbol).result.list[0].lastPrice
                     balance += i.quantity * (Double(price) ?? 0)
-                    
                 }
+                animateBalanceUpdate(to: balance)
             } catch {
                 print("Failed to fetch coins: \(error.localizedDescription)")
             }
-            animateBalanceUpdate(to: balance)
         }
     }
     
@@ -154,112 +158,10 @@ struct SearchBar: View {
     }
 }
 
-struct UserCoinListView: View {
-    @Environment(GlobalViewModel.self) private var globalViewModel
-    @State var searchText: String = ""
-    
-    let coins: [UserHolding]
-    let allowSelection: Bool
-    let navigationDestination: (Any) -> AnyView
-    
-    var filteredCoins: [UserHolding] {
-        if searchText.isEmpty {
-            return coins
-        } else {
-            return coins.filter { $0.coin.coinName.localizedCaseInsensitiveContains(searchText) }
-        }
-    }
-    
-    var body: some View {
-        NavigationStack{
-            SearchBar(text: $searchText)
-            
-            if filteredCoins.isEmpty {
-                ContentUnavailableView(
-                    "No cryptocurrencies found",
-                    systemImage: "bitcoinsign.circle.fill"
-                )
-                .foregroundColor(.gray)
-            } else{
-                ScrollView {
-                    LazyVStack {
-                        ForEach(filteredCoins, id: \.self) { coin in
-                            if allowSelection {
-                                NavigationLink(destination: navigationDestination(coin)) {
-                                    coinRow(coin)
-                                }
-                                .simultaneousGesture(TapGesture().onEnded {
-                                    globalViewModel.selectedCoin = coin
-                                })
-                            }
-                            else{
-                                coinRow(coin)
-                            }
-                        }
-                    }
-                }
-                .navigationDestination(for: UserHolding.self) { coin in
-                    Text(coin.email)
-                }
-            }
-        }
-    }
-    
-    func coinRow(_ coin: UserHolding) -> some View {
-        HStack(spacing: 16) {
-            AsyncImage(url: URL(string: coin.coin.imageUrl)) { phase in
-                switch phase {
-                case .empty:
-                    ProgressView()
-                case .success(let image):
-                    image.resizable()
-                case .failure:
-                    Image(systemName: "bitcoinsign.circle.fill")
-                        .resizable()
-                        .foregroundColor(.secondary)
-                @unknown default:
-                    EmptyView()
-                }
-            }
-            .scaledToFit()
-            .frame(width: 40, height: 40)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(coin.coin.coinName)
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
-                Text(coin.coin.coinSymbol.uppercased())
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-            }
-            
-            Spacer()
-            
-            VStack(alignment: .trailing, spacing: 4) {
-                Text("Quantity")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Text("\(coin.quantity, specifier: "%.2f")")
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                    .bold()
-                
-            }
-            .padding(.leading, 8)
-        }
-        
-        .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(10)
-    }
-}
-
 
 #Preview {
     NavigationStack {
         WalletView()
-            .environment(GlobalViewModel())
     }
 }
+
