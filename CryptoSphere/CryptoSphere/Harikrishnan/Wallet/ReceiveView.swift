@@ -1,122 +1,93 @@
 import SwiftUI
 import CoreImage.CIFilterBuiltins
+import Kingfisher
 
 struct ReceiveView: View {
     let coin: CoinDetails
-    @State private var address: String?
-    @State private var isLoading = true
+    @State var address: String?
     @Environment(\.globalViewModel) var globalViewModel
+    var logoAnimation: Namespace.ID
     
     var body: some View {
         VStack(spacing: 16) {
-            // Header
-            VStack(spacing: 4) {
+            HStack{
+                KFImage(URL(string: coin.imageUrl))
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 50, height: 50)
+                    .clipShape(Circle())
+                    .shadow(radius: 4)
+                    .matchedGeometryEffect(id: "i\(coin.imageUrl)", in: logoAnimation)
+                
                 Text("Receive \(coin.coinSymbol)")
-                    .font(.custom("ZohoPuvi-Bold", size: 25))
-                
-                Text("Scan or copy the address")
-                    .font(.custom("ZohoPuvi-Semibold", size: 18))
-                    .foregroundColor(.gray)
+                    .font(.custom("ZohoPuvi-SemiBold", size: 24))
             }
-            .padding(.top, 24)
             
-            // QR Code
-            ZStack {
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(.background.opacity(0.0))
-                    .frame(width: 240, height: 240)
-                    .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
+            Text("Scan or copy the address below")
+                .font(.custom("ZohoPuvi-Medium", size: 18))
+                .foregroundColor(.gray)
+            
+            
+            if let address = address, let qrImage = generateQRCode(from: address) {
+                Image(uiImage: qrImage)
+                    .resizable()
+                    .interpolation(.none)
+                    .scaledToFit()
+                    .frame(width: 200, height: 200)
+                    .padding(.top, 150)
+                Text(address)
+                    .font(.custom("ZohoPuvi-SemiBold", size: 22))
                 
-                if isLoading {
-                    ProgressView()
-                } else if let address = address {
-                    VStack(spacing: 12) {
-                        Image(uiImage: generateQRCode(from: address))
-                            .resizable()
-                            .interpolation(.none)
-                            .frame(width: 200, height: 200)
-                        
-                        Text(address)
-                            .font(.system(.caption, design: .monospaced))
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                            .padding(.horizontal, 8)
-                    }
-                } else {
-                    VStack(spacing: 8) {
-                        Image(systemName: "xmark.circle")
-                            .font(.system(size: 40, weight: .bold))
-                        Text("Address unavailable")
-                            .font(.custom("ZohoPuvi-Semibold", size: 18))
-                    }
-                    .foregroundColor(.red)
-                }
+            } else {
+                Text("Address Unavailable")
+                    .font(.custom("ZohoPuvi-SemiBold", size: 16))
+                    .foregroundColor(.orange)
             }
-            .padding(.vertical, 16)
             
-            // Copy Button
+            Spacer()
+            
             Button(action: copyToClipboard) {
-                HStack {
-                    Image(systemName: "doc.on.doc")
-                    Text("Copy Address")
-                }
-                .font(.custom("ZohoPuvi-Semibold", size: 20))                .foregroundColor(.white)
-                .padding()
-                .frame(maxWidth: .infinity)
-                .background(Color.orange.gradient)
-                .cornerRadius(12)
+                Label("Copy Address", systemImage: "doc.on.doc")
+                    .font(.custom("ZohoPuvi-SemiBold", size: 20))
+                    .padding(10)
+                    .padding(.horizontal, 20)
+                    .background(address != nil ? .primaryTheme : Color.gray)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
             }
             .disabled(address == nil)
-            .opacity(address == nil ? 0.5 : 1)
-            .padding(.horizontal, 32)
+            .padding(.top, -100)
+            
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(.grayButton))
-        .task { await getAddress() }
-    }
-    
-    private func generateQRCode(from string: String) -> UIImage {
-        let context = CIContext()
-        let filter = CIFilter.qrCodeGenerator()
-        filter.message = Data(string.utf8)
+        .onAppear {
+            self.address = "\(globalViewModel.session.username)_\(coin.id)"
+        }
         
-        if let outputImage = filter.outputImage {
-            // Create color filter to tint the QR code
-            let colorFilter = CIFilter(name: "CIFalseColor")!
-            colorFilter.setValue(outputImage, forKey: "inputImage")
-            colorFilter.setValue(CIColor(color: UIColor.blue), forKey: "inputColor0")
-            colorFilter.setValue(CIColor(color: UIColor.background), forKey: "inputColor1")
-            if let coloredOutput = colorFilter.outputImage,
-               let cgImage = context.createCGImage(coloredOutput, from: coloredOutput.extent) {
-                return UIImage(cgImage: cgImage)
-            }
-        }
-        return UIImage(systemName: "xmark.circle") ?? UIImage()
-    }
-    
-    func getAddress() async {
-        do {
-            let fetchedAddress = try await ServerResponce.shared.fetchCoinAddresses(
-                userName: globalViewModel.session.username,
-                coinId: coin.id
-            )
-            DispatchQueue.main.async {
-                self.address = fetchedAddress
-                self.isLoading = false
-            }
-        } catch {
-            DispatchQueue.main.async {
-                self.address = nil
-                self.isLoading = false
-            }
-            print("Error fetching address: \(error)")
-        }
     }
     
     func copyToClipboard() {
         if let address {
             UIPasteboard.general.string = address
         }
+    }
+    
+    func generateQRCode(from string: String) -> UIImage? {
+        let context = CIContext()
+        let filter = CIFilter.qrCodeGenerator()
+        filter.message = Data(string.utf8)
+        
+        if let outputImage = filter.outputImage {
+            let colorFilter = CIFilter.falseColor()
+            colorFilter.inputImage = outputImage
+            colorFilter.color0 = CIColor(color: .orange) // QR Code Color
+            colorFilter.color1 = CIColor(color: .clear) // Background Color
+            
+            if let coloredImage = colorFilter.outputImage,
+               let cgImage = context.createCGImage(coloredImage, from: coloredImage.extent) {
+                return UIImage(cgImage: cgImage)
+            }
+        }
+        return nil
     }
 }
 
@@ -126,5 +97,5 @@ struct ReceiveView: View {
         coinName: "Bitcoin",
         coinSymbol: "BTC",
         imageUrl: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1547033579"
-    ))
+    ), logoAnimation: Namespace().wrappedValue)
 }

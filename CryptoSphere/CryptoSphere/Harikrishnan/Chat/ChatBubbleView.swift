@@ -1,4 +1,5 @@
 import SwiftUI
+import Kingfisher
 
 struct ChatBubbleView: View {
     let message: Message
@@ -18,34 +19,20 @@ struct ChatBubbleView: View {
                         HStack(alignment: .center, spacing: 20) {
                             // Profile Image
                             
-                            if let url = URL(string: String(message.message.split(separator: ",")[4])) {
-                                AsyncImage(url: url) { phase in
-                                    switch phase {
-                                    case .empty:
-                                        ProgressView()
-                                            .progressViewStyle(CircularProgressViewStyle())
-                                            .frame(width: 50, height: 50)
-                                    case .success(let image):
-                                        image.resizable()
-                                            .scaledToFill()
-                                    case .failure:
-                                        Image(systemName: "person.circle.fill")
-                                            .resizable()
-                                            .foregroundColor(.secondary)
-                                    @unknown default:
-                                        EmptyView()
-                                    }
-                                }
-                                .frame(width: 40, height: 40)
-                                .clipShape(Circle())
+                            if let url = URL(string: String(message.message.split(separator: ",")[1])) {
+                                KFImage(url)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: 50, height: 50)
+                                    .clipShape(Circle())
                             }
                             
                             // User Information
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(" \(String(message.message.split(separator: ",")[3]))")
+                                Text(" \(String(message.message.split(separator: ",")[2]))")
                                     .font(.custom("ZohoPuvi-Bold", size: 24))
                                 
-                                Text(" \(String(message.message.split(separator: ",")[2]))")
+                                Text(" \(String(message.message.split(separator: ",")[3]))")
                                     .font(.custom("ZohoPuvi-Bold", size: 18))
                                     .foregroundColor(.secondary)
                             }
@@ -64,7 +51,7 @@ struct ChatBubbleView: View {
                                 .font(.custom("ZohoPuvi-Semibold", size: 18))
                                 .foregroundColor(.primaryTheme)
                             
-                            Text(" \(String(message.message.split(separator: ",")[5])) \(String(message.message.split(separator: ",")[2]).replacingOccurrences(of: "USDT", with: ""))")
+                            Text(" \(String(message.message.split(separator: ",")[4])) \(String(message.message.split(separator: ",")[3]).replacingOccurrences(of: "USDT", with: ""))")
                                 .font(.custom("ZohoPuvi-Semibold", size: 16))
                                 .foregroundColor(.white)
                         }
@@ -161,7 +148,7 @@ struct RoundedCornerShape: Shape {
             message: Message(
                 from: "user1",
                 to: "user2",
-                message: "@payment,success,BTCUSDT,Bitcoin,https://cryptologos.cc/logos/bitcoin-btc-logo.png,0.1",
+                message: "@payment,https://cryptologos.cc/logos/bitcoin-btc-logo.png,Bitcoin,BTCUSDT,0.1",
                 timestamp: Int(Date().timeIntervalSinceNow)
             ),
             isCurrentUser: true
@@ -174,9 +161,7 @@ struct RoundedCornerShape: Shape {
                 message: "Hi! This is my reply",
                 timestamp: Int(Date().timeIntervalSinceNow)
             ),
-            isCurrentUser: true
+            isCurrentUser: false
         )
     }
-    .padding()
-    .background(Color(.systemBackground))
 }

@@ -11,7 +11,20 @@ import Combine
 
 @Observable
 class WebSocketManager {
-    var messages: [Message] = []
+    var messages: [Message] = [
+//        Message(from: "Hari Krishnan", to: preview, message: "Hello, Bob!", timestamp: 1700000001),
+//        Message(from: "bobmarley", to: preview, message: "Hey Alice, how are you?", timestamp: 1700000002),
+//        Message(from: "charlieb", to: preview, message: "Hi Alice!", timestamp: 1700000003),
+//        Message(from: "Praveen Kumar", to: preview, message: "Hey Eve, let's meet.", timestamp: 1700000004),
+//        Message(from: "Eve", to: preview, message: "Sure, see you soon!", timestamp: 1700000005)
+    ] {
+        didSet {
+            if let lastMessage = messages.last {
+                print("\(lastMessage.from) -> \(lastMessage.to) = \(lastMessage.message)")
+            }
+        }
+    }
+    
     private var webSocketTask: URLSessionWebSocketTask?
     private var username: String
     private let urlSession: URLSession
@@ -19,7 +32,7 @@ class WebSocketManager {
     private(set) var isConnected: Bool = false
     
     static let shared = WebSocketManager()
-
+    
     init() {
         self.username = " "
         let configuration = URLSessionConfiguration.default
@@ -28,26 +41,39 @@ class WebSocketManager {
 
     // Connect to WebSocket server
     func connect() async {
-        self.username = UserSession.shared?.userName ?? "Krishnan"
+        self.username = UserSession.shared?.userName ?? preview
         await disconnect()
-        guard let url = URL(string: "\(link)/ws/\(username)".replacingOccurrences(of: "https", with: "wss")) else {
+        guard let url = URL(string: "\(link)/ws/\(username)".replacingOccurrences(of: "http", with: "ws")) else {
             print("❌ Invalid WebSocket URL")
             return
         }
+
+        try? await Task.sleep(for: .seconds(1))
         webSocketTask = urlSession.webSocketTask(with: url)
         webSocketTask?.resume()
-        try? await Task.sleep(nanoseconds: 2_000_000_000)
-
+        try? await Task.sleep(for: .seconds(2))
+        
         if webSocketTask?.state == .running {
             print("✅ WebSocket connection successful! \(url.absoluteString)")
             isConnected = true
+            await getAllChatHistory()
             await receiveMessages()
         } else {
             print("❌ WebSocket connection failed! Retrying in 5 sec...")
-            try? await Task.sleep(nanoseconds: 5_000_000_000)
+            try? await Task.sleep(for: .seconds(5))
             await connect()
         }
     }
+    
+    private func getAllChatHistory() async {
+        do {
+            let history = try await ServerResponce.shared.getChatHistory(from: username)
+            WebSocketManager.shared.messages.insert(contentsOf: history, at: 0)
+        } catch {
+            print("Failed to load messages: \(error.localizedDescription)")
+        }
+    }
+    
     func sendMessage(to user: String, message: String) async {
         guard let webSocketTask else {
             print("❌ WebSocket is not connected")
@@ -62,13 +88,11 @@ class WebSocketManager {
 
         let timestamp = Int(Date().timeIntervalSince1970)
         let messageObject = Message(from: username, to: user, message: message, timestamp: timestamp)
-        
         do {
             let jsonData = try JSONEncoder().encode(messageObject)
             let jsonString = String(data: jsonData, encoding: .utf8)
             do {
                 try await webSocketTask.send(.string(jsonString ?? ""))
-                print("✅ Message sent successfully \(jsonString ?? "")")
             } catch {
                 print("❌ Error sending message: \(error.localizedDescription)")
             }
@@ -91,14 +115,11 @@ class WebSocketManager {
 
                 switch result {
                 case .string(let message):
-                    print("📩 Received raw message: \(message)")
+                    print(message)
                     if let jsonData = message.data(using: .utf8) {
                         do {
                             let receivedMessage = try JSONDecoder().decode(Message.self, from: jsonData)
-                            DispatchQueue.main.async {
-                                self.messages.append(receivedMessage)
-                            }
-                            print(messages.count)
+                            WebSocketManager.shared.messages.append(receivedMessage)
                         } catch {
                             print("❌ Error decoding JSON: \(error.localizedDescription)")
                         }
@@ -137,5 +158,22 @@ struct Message: Decodable, Encodable, Identifiable, Equatable {
     
     private enum CodingKeys: String, CodingKey {
         case from, to, message, timestamp
+    }
+}
+
+import SwiftData
+
+@Model
+class MessageModel {
+    var from: String
+    var to: String
+    var message: String
+    var timestamp: Int
+
+    init(from: String, to: String, message: String, timestamp: Int) {
+        self.from = from
+        self.to = to
+        self.message = message
+        self.timestamp = timestamp
     }
 }

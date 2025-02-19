@@ -1,4 +1,5 @@
 import SwiftUI
+import Kingfisher
 
 struct SendView: View {
     let userHolding: UserHolding
@@ -8,6 +9,7 @@ struct SendView: View {
     @State private var isConfirmingTransfer: Bool = false
     
     @Environment(\.globalViewModel) var globalViewModel
+    var nameSpace: Namespace.ID
     
     var body: some View {
         VStack(spacing: 20) {
@@ -16,7 +18,7 @@ struct SendView: View {
             
             // Coin Details
             coinDetailsView()
-                .padding(.top, 40)
+                .padding(.top, 20)
             
             VStack(spacing: 30){
                 // Transfer Address Input
@@ -24,15 +26,9 @@ struct SendView: View {
                 
                     .onAppear {
                         if(globalViewModel.selectedCoin.coin.id != 0 && globalViewModel.selectedUser.username != ""){
-                            setUpAddress()
+                            transferAddress = (globalViewModel.selectedUser.username) + "_" +  String(globalViewModel.selectedCoin.coin.id)
                         }
                     }
-                    .onDisappear {
-                        globalViewModel.selectedCoin = UserHolding(email: "", coin: CoinDetails(id: 0, coinName: "", coinSymbol: "", imageUrl: ""), quantity: 2)
-                        
-                        globalViewModel.selectedUser = User(email: "", username: "", password: "", profilePicture: "")
-                    }
-                
                 // Amount Input
                 amountInputView()
             }.padding(.top, 40)
@@ -45,10 +41,7 @@ struct SendView: View {
         .padding()
         .background(Color.background)
         .sheet(isPresented: $isShowingScanner) {
-            QRCodeScannerView { code in
-                transferAddress = code
-                isShowingScanner = false
-            }
+            QRReaderView(scannedCode: $transferAddress)
         }
         .alert("Confirm Transfer", isPresented: $isConfirmingTransfer) {
             Button("Cancel", role: .cancel) {}
@@ -59,14 +52,6 @@ struct SendView: View {
             }
         } message: {
             Text("Are you sure you want to transfer \(amount) \(userHolding.coin.coinSymbol) to \(transferAddress)?")
-        }
-    }
-    
-    func setUpAddress() {
-        Task{
-            let UserId = try? await JSONDecoder().decode([String: String].self, from: URLSession.shared.data(from: URL(string: "https://spyer.pagekite.me//get_user/\(globalViewModel.selectedUser.username)")!).0)["id"] ?? ""
-            
-            transferAddress = (UserId ?? "") + "_" +  String(globalViewModel.selectedCoin.coin.id)
         }
     }
     
@@ -83,24 +68,9 @@ struct SendView: View {
     
     private func coinDetailsView() -> some View {
         HStack(spacing: 12) {
-            AsyncImage(url: URL(string: userHolding.coin.imageUrl)) { image in
-                image.resizable()
-            } placeholder: {
-                ProgressView()
-            }
-            .frame(width: 40, height: 40)
-            .clipShape(Circle())
+            SymbolWithNameView(coin: userHolding.coin, searchText: "", nameSpace: nameSpace)
+            .padding(.leading, 10)
             
-            VStack(alignment: .leading, spacing: 4) {
-                Text(userHolding.coin.coinName)
-                    .font(.custom("ZohoPuvi-Semibold", size: 22))
-                    .foregroundStyle(.font)
-                
-                Text(userHolding.coin.coinSymbol)
-                    .font(.custom("ZohoPuvi-Semibold", size: 16))
-                    .foregroundStyle(.secondaryFont)
-                
-            }
             Spacer()
         }
         .padding()
@@ -113,6 +83,7 @@ struct SendView: View {
             Text("Recipient Address")
                 .font(.custom("ZohoPuvi-Semibold", size: 20))
                 .foregroundStyle(.font)
+                .padding(.bottom, 10)
             
             HStack {
                 TextField("Enter wallet address", text: $transferAddress)
@@ -141,6 +112,7 @@ struct SendView: View {
             Text("Amount")
                 .font(.custom("ZohoPuvi-Semibold", size: 20))
                 .foregroundStyle(.font)
+                .padding(.bottom, 10)
             
             TextField("0", text: $amount)
                 .keyboardType(.decimalPad)
@@ -177,33 +149,9 @@ struct SendView: View {
     // MARK: - Actions
     
     private func confirmTransfer() async {
-        print("Transferring \(amount) \(userHolding.coin.coinSymbol) to \(transferAddress)")
-        
-        
-        await WebSocketManager.shared.sendMessage(to: " ", message: "@payment,\(globalViewModel.selectedCoin.coin.id),\(amount),\(transferAddress)")
-    }
-}
-
-// MARK: - QR Code Scanner View
-
-struct QRCodeScannerView: UIViewControllerRepresentable {
-    var onScan: (String) -> Void
-    
-    func makeUIViewController(context: Context) -> some UIViewController {
-        let scannerVC = ScannerViewController()
-        scannerVC.onScan = onScan
-        return scannerVC
-    }
-    
-    func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {}
-}
-
-class ScannerViewController: UIViewController {
-    var onScan: ((String) -> Void)?
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Implement QR code scanning logic here
+        Task{
+            await WebSocketManager.shared.sendMessage(to: String(transferAddress.split(separator: "_")[0]), message: "@payment,\(globalViewModel.selectedCoin.coin.id),\(amount),\(transferAddress)")
+        }
     }
 }
 
@@ -219,5 +167,5 @@ class ScannerViewController: UIViewController {
             imageUrl: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png"
         ),
         quantity: 0.5
-    ))
+    ), nameSpace: Namespace().wrappedValue)
 }

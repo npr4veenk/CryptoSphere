@@ -24,4 +24,4 @@ class UserSession {
     }
 }
 
-let preview = "john"
+

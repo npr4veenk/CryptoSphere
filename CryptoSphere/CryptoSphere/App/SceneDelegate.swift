@@ -66,7 +66,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
 //        window.rootViewController = tabBarController
-        window.rootViewController = UIHostingController(rootView: Login().modelContainer(for: UserSession.self))
+        window.rootViewController = UIHostingController(rootView:     BuySellView(
+            mot: "Buy",
+            coin: CoinDetails(
+                id: 325,
+                coinName: "Bitcoin",
+                coinSymbol: "BTCUSDT",
+                imageUrl: "https://assets.coingecko.com/coins/images/1/large/bitcoin.png"
+            )
+        ).modelContainer(for: MessageModel.self))
+        
         self.window = window
         window.makeKeyAndVisible()
 

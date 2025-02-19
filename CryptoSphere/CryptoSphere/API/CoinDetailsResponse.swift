@@ -1,12 +1,5 @@
 import Foundation
 
-struct CoinDetails: Decodable, Encodable, Hashable {
-    let id: Int
-    let coinName: String
-    let coinSymbol: String
-    let imageUrl: String
-}
-
 class CoinDetailsResponse{
     var baseURL = "https://spyer.pagekite.me/"
     

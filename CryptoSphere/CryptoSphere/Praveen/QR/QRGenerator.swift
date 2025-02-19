@@ -4,17 +4,20 @@ import CoreImage.CIFilterBuiltins
 class QRCodeView: UIView {
     // MARK: - UI Elements
     private let qrImageView = UIImageView()
+    private let value: String
 
     // MARK: - Initializers
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(_ value: String) {
+        self.value = value
+        super.init(frame: .zero)
         setupUI()
+        generateQRCode()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     // MARK: - Setup
     private func setupUI() {
         backgroundColor = .white
@@ -24,7 +27,7 @@ class QRCodeView: UIView {
         qrImageView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(qrImageView)
         
-        // Add constraints to center the UIImageView
+        // Constraints
         NSLayoutConstraint.activate([
             qrImageView.centerXAnchor.constraint(equalTo: centerXAnchor),
             qrImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -32,49 +35,43 @@ class QRCodeView: UIView {
             qrImageView.heightAnchor.constraint(equalToConstant: 200)
         ])
     }
-    
-    // MARK: - Public Method
-    func generateQRCode(from string: String) {
-        if let qrImage = generateQRCodeImage(from: string) {
+
+    // MARK: - QR Code Generation
+    private func generateQRCode() {
+        if let qrImage = generateQRCodeImage(from: value) {
             qrImageView.image = qrImage
         } else {
             print("Failed to generate QR code")
         }
     }
-    
-    // MARK: - Private Method
+
     private func generateQRCodeImage(from string: String) -> UIImage? {
-        let data = string.data(using: String.Encoding.ascii)
+        let data = string.data(using: .ascii)
         let filter = CIFilter.qrCodeGenerator()
         filter.setValue(data, forKey: "inputMessage")
-        
+
         if let outputImage = filter.outputImage {
-            let transformedImage = outputImage.transformed(by: CGAffineTransform(scaleX: 10, y: 10)) // Scale up the image
+            let transformedImage = outputImage.transformed(by: CGAffineTransform(scaleX: 10, y: 10))
             return UIImage(ciImage: transformedImage)
         }
         return nil
     }
 }
 
+// MARK: - ViewController
 class QRCodeViewController: UIViewController {
-    private let qrCodeView = QRCodeView()
+    private let qrCodeView = QRCodeView("Hello, QR!")
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupQRCodeView()
-        
-        // Generate and display the QR code
-        qrCodeView.generateQRCode(from: "Hello")
     }
-    
+
     private func setupQRCodeView() {
         view.backgroundColor = .white
-        
-        // Add the QRCodeView to the view controller
         view.addSubview(qrCodeView)
         qrCodeView.translatesAutoresizingMaskIntoConstraints = false
         
-        // Add constraints to fill the view
         NSLayoutConstraint.activate([
             qrCodeView.topAnchor.constraint(equalTo: view.topAnchor),
             qrCodeView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
@@ -85,5 +82,6 @@ class QRCodeViewController: UIViewController {
 }
 
 #Preview {
-    QRCodeViewController()
+    QRCodeView("hellaao")
 }
+

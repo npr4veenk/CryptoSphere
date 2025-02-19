@@ -26,14 +26,13 @@ struct Login: View {
             LoginBackgroundView(session: $currentSession)
                 .onAppear { restoreSession() }
         } else {
-            AllUsersListView(profileAnimation: profileAnimation, onSelectUser: { user, _ in
+            UsersListView(profileAnimation: profileAnimation, onSelectUser: { user, _ in
                 withAnimation{
                     AnyView(ChatView(toUser: user, profileAnimation: profileAnimation))
                 }
             })
             .onAppear {
                 Task{
-                    await globalViewModel.wsManager.connect()
                     await ServerResponce.shared.addUser(user: globalViewModel.session)
                     await WebSocketManager.shared.connect()
                 }
@@ -69,7 +68,7 @@ struct OnboardView: View{
                 .font(.custom("ZohoPuvi-ExtraBold", size: 28))
             
             Text(description)
-                .font(.custom("Rockwell", size: 20))
+                .font(.custom("Rockwell", size: 18))
                 .lineSpacing(5)
                 .multilineTextAlignment(.center)
                 .foregroundColor(.white)
@@ -88,7 +87,7 @@ struct LoginBackgroundView: View {
     @State private var scale = 0.0
     @State private var secScale = 0.0
     @State private var slideInitial = 140.0
-    @State private var infoOffset = 50.0
+    @State private var infoOffset = 60.0
     
     @Binding var session: UserSession
     @Environment(\.globalViewModel) private var globalViewModel
@@ -120,7 +119,7 @@ struct LoginBackgroundView: View {
                     VStack(spacing: 10) {
                         ForEach(sentences.indices, id: \.self) { index in
                             Text(sentences[index])
-                                .font(.custom("ZohoPuvi-Bold", size: 24))
+                                .font(.custom("ZohoPuvi-Bold", size: 22))
                                 .foregroundStyle(.white)
                                 .opacity(visibleCount > index ? 1 : 0)
                         }
@@ -132,7 +131,7 @@ struct LoginBackgroundView: View {
                         showSheet()
                     }) {
                         Text("Get Started")
-                            .font(.custom("ZohoPuvi-Bold", size: 24))
+                            .font(.custom("ZohoPuvi-Bold", size: 22))
                             .foregroundColor(.white)
                             .frame(width: 250, height: 50)
                     }
@@ -152,7 +151,7 @@ struct LoginBackgroundView: View {
                                     .frame(width: 35, height: 35)
                                 
                                 Text("Sign in with Google")
-                                    .font(.custom("ZohoPuvi-ExtraBold", size: 22))
+                                    .font(.custom("ZohoPuvi-ExtraBold", size: 20))
                                     .foregroundColor(.grayButton)
                                     .onTapGesture {
                                         let targetSession = UserSession(isSignedIn: false)
@@ -191,7 +190,7 @@ struct LoginBackgroundView: View {
                                 .foregroundStyle(.black)
                             
                             Text("Sign in with Apple")
-                                .font(.custom("ZohoPuvi-ExtraBold", size: 22))
+                                .font(.custom("ZohoPuvi-ExtraBold", size: 20))
                                 .foregroundColor(.grayButton)
                         }
                         .frame(width: 330, height: 50)
@@ -253,7 +252,6 @@ struct LoginBackgroundView: View {
     }
     
     func onChange() {
-        print(2)
         DispatchQueue.main.async {
             self.currentOffset = gestureOffset + lastOffset
         }
@@ -274,7 +272,7 @@ struct LoginBackgroundView: View {
                 }
             } else {
                 currentOffset = 0
-                infoOffset = 50
+                infoOffset = 60
                 scale = 1
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {

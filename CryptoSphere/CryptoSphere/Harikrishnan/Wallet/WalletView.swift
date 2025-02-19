@@ -18,18 +18,16 @@ struct WalletView: View {
     @Environment(\.globalViewModel) private var globalViewModel
     
     var body: some View {
-        NavigationStack {
-            VStack(alignment: .leading, spacing: 16) {
-                walletData()
-                    .onAppear { fillcoins() }
-                AllCoinsListView(isUserHoldingCoins: true, onSelectCoin: { userHolding in
-                    AnyView(SendView(userHolding: userHolding as! UserHolding))
-                })
-            }
-            .refreshable { fillcoins() }
+        VStack(alignment: .leading, spacing: 16) {
+            walletData()
+                .onAppear {
+                    fillcoins()
+                }
+                .padding()
+            
+            CoinHoldingListView(hasNavigate: false)
         }
-        .padding()
-        .navigationTitle("Wallet")
+        .refreshable { fillcoins() }
     }
     
     func walletData() -> some View {
@@ -37,8 +35,9 @@ struct WalletView: View {
             HStack {
                 Image(systemName: "wallet.bifold")
                     .font(.title)
+                    .bold()
                 Text("Your Balance")
-                    .font(.custom("ZohoPuvi-Bold", size: 22))
+                    .font(.custom("ZohoPuvi-Semibold", size: 22))
             }
             
             Text("\(balance, format: .currency(code: "USD"))")
@@ -81,19 +80,13 @@ struct WalletView: View {
             }
         }
         .sheet(isPresented: $isSendActionSheetPresented) {
-            AllCoinsListView(isUserHoldingCoins: true, onSelectCoin: { userHolding in
-                AnyView(SendView(userHolding: userHolding as! UserHolding))
-            })
-            .padding()
-            .presentationDragIndicator(.visible)
-            .navigationTitle("Select Coin to Receive")
+            CoinHoldingListView(hasNavigate: true)
+                .presentationDragIndicator(.visible)
         }
         
         .sheet(isPresented: $isReceiveActionSheetPresented) {
-            AllCoinsListView(isUserHoldingCoins: true, onSelectCoin: { userHolding in
-                AnyView(SendView(userHolding: userHolding as! UserHolding))
-            })
-            .presentationDragIndicator(.visible)
+            CoinsListView(dismiss: false, isMarket: false)
+                .presentationDragIndicator(.visible)
         }
         
     }
@@ -102,9 +95,9 @@ struct WalletView: View {
         Task {
             balance = 0.0
             do {
-                coins = try await ServerResponce.shared.fetchuserholdings(userName: globalViewModel.session.username)
+                coins = try await ServerResponce.shared.fetchuserholdings()
                 for i in coins{
-                    let price = try await LivePriceResponse().fetchPrice(coinName: i.coin.coinSymbol).result.list[0].lastPrice
+                    let price = try await fetchPrice(coinName: i.coin.coinSymbol).result.list[0].lastPrice
                     balance += i.quantity * (Double(price) ?? 0)
                 }
                 animateBalanceUpdate(to: balance)
@@ -134,32 +127,6 @@ struct WalletView: View {
                 timer.invalidate()
             }
         }
-    }
-}
-
-struct SearchBar: View {
-    @Binding var text: String
-    
-    var body: some View {
-        HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.secondary)
-            
-            TextField("Search coins", text: $text)
-                .font(.custom("ZohoPuvi-Bold", size: 22))
-
-            if !text.isEmpty {
-                Button {
-                    text = ""
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
-                }
-            }
-        }
-        .background(Color("GrayButtonColor"))
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.03), radius: 5, y: 3)
     }
 }
 

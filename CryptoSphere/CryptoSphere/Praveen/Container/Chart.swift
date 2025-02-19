@@ -33,7 +33,6 @@ struct ChartViews: View {
         .onAppear {
             Task {
                 await getData()
-                print(coin)
             }
         }
     }
@@ -49,6 +48,7 @@ struct ChartViews: View {
                 .lineStyle(StrokeStyle(lineWidth: CGFloat(lineWidth)))
             }
         }
+        .padding(4)
         .mask(Rectangle().scaleEffect(x: progress, anchor: .leading))
         .chartYScale(domain: yAxisDomain)
         .chartXAxis(.hidden)

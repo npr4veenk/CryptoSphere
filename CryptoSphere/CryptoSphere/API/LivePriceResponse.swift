@@ -5,7 +5,7 @@ struct CryptoResponse: Decodable {
 }
 
 struct CryptoMarket: Codable {
-    let category: String
+//    let category: String
     let list: [CryptoTicker]
 }
 
@@ -33,7 +33,7 @@ struct BybitPreviousDataResponse: Decodable {
     let time : Int
     
     struct PreviousResult: Codable {
-        let category: String
+//        let category: String
         let list: [[String]]
     }
 }
@@ -53,7 +53,6 @@ class LivePriceResponse{
         guard let url = urlComponents.url else {
             throw CoinError.invalidURL
         }
-        
         let (data, response) = try await URLSession.shared.data(from: url)
         
         guard let httpResponse = response as? HTTPURLResponse else {

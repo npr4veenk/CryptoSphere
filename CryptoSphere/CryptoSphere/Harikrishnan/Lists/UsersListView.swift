@@ -1,7 +1,8 @@
 import SwiftUI
+import AudioToolbox
 import Kingfisher
 
-struct AllUsersListView: View {
+struct UsersListView: View {
     
     @State private var searchText: String = ""
     @State private var users: [User] = []
@@ -13,7 +14,16 @@ struct AllUsersListView: View {
     var onSelectUser: (Binding<User?>, Namespace.ID) -> AnyView
     
     var filteredUsers: [User] {
-        searchText.isEmpty ? users : users.filter { $0.username.localizedCaseInsensitiveContains(searchText) }
+        if searchText.isEmpty {
+            let uniqueSenders = Array(Set(WebSocketManager.shared.messages.map { $0.from }))
+            let orderedSenders = WebSocketManager.shared.messages.reversed().map { $0.from }.filter { uniqueSenders.contains($0) }
+            
+            return users
+                .filter { orderedSenders.contains($0.username) }
+                .sorted { orderedSenders.firstIndex(of: $0.username)! < orderedSenders.firstIndex(of: $1.username)! }
+        } else {
+            return users.filter { $0.username.localizedCaseInsensitiveContains(searchText) }
+        }
     }
     
     @Environment(\.globalViewModel) var globalViewModel
@@ -38,34 +48,20 @@ struct AllUsersListView: View {
                             } label: {
                                 VStack (alignment: .leading){
                                     HStack(spacing: 16) {
-                                        AsyncImage(url: URL(string: user.profilePicture)) { phase in
-                                            switch phase {
-                                            case .empty:
-                                                ProgressView()
-                                            case .success(let image):
-                                                image.resizable()
-                                            case .failure:
-                                                Image(systemName: "person.circle.fill")
-                                                    .resizable()
-                                                    .foregroundColor(.secondary)
-                                            @unknown default:
-                                                EmptyView()
-                                            }
-                                        }
-                                        .matchedGeometryEffect(id: "profile_\(user.profilePicture)", in: profileAnimation)
-                                        .scaledToFill()
-                                        .frame(width: 60, height: 60)
-                                        .clipShape(Circle())
-                                        .overlay(Circle().stroke(Color.gray.opacity(0.2), lineWidth: 1))
+                                        KFImage(URL(string: user.profilePicture))
+                                            .resizable()
+                                            .matchedGeometryEffect(id: "profile_\(user.profilePicture)", in: profileAnimation)
+                                            .scaledToFill()
+                                            .frame(width: 60, height: 60)
+                                            .clipShape(Circle())
+                                            .overlay(Circle().stroke(Color.gray.opacity(0.2), lineWidth: 1))
                                         
                                         VStack(alignment: .leading, spacing: 4) {
                                             highlightedUsername(user.username)
-                                                .font(.headline)
-                                                .foregroundStyle(Color.primary)
+                                                .font(.custom("ZohoPuvi-Semibold", size: 18))         .foregroundStyle(Color.primary)
                                                 .matchedGeometryEffect(id: "username_\(user.username)", in: profileAnimation)
                                             Text(user.email)
-                                                .font(.subheadline)
-                                                .foregroundColor(.secondary)
+                                                .font(.custom("ZohoPuvi-Medium", size: 16))                                  .foregroundColor(.secondary)
                                         }
                                     }
                                     .padding(.vertical, 8)
@@ -81,8 +77,9 @@ struct AllUsersListView: View {
                     }
                 }
                 .padding(.horizontal)
-                .navigationTitle("Users")
                 .searchable(text: $searchText, prompt: "Search users")
+                .font(.custom("ZohoPuvi-Medium", size: 20))
+                .padding(10)
             }
         }
         .onAppear { fetchUsers() }
@@ -118,8 +115,14 @@ struct AllUsersListView: View {
 
 struct ChatView: View {
     @Binding var toUser: User?
-    @State var from: String = ""
-    @State private var messageHistory: [Message] = []
+    @State private var webSocketManager =  WebSocketManager.shared
+    
+    var filteredMessages: [Message] {
+        webSocketManager.messages.filter { msg in
+            msg.from == toUser?.username || msg.to == toUser?.username
+        }
+    }
+    
     @State private var messageText = ""
     @Environment(\.globalViewModel) var globalViewModel
     
@@ -128,42 +131,39 @@ struct ChatView: View {
     var body: some View {
         VStack {
             ChatNavBar
+                .onAppear {
+                    globalViewModel.selectedUser = toUser!
+                }
+                .onDisappear {
+                    globalViewModel.selectedCoin = UserHolding(email: "", coin: CoinDetails(id: 0, coinName: "", coinSymbol: "", imageUrl: ""), quantity: 2)
+                    
+                    globalViewModel.selectedUser = User(email: "", username: "", password: "", profilePicture: "")
+                }
             
             ScrollViewReader { scrollView in
                 ScrollView {
                     LazyVStack(spacing: 8) {
-                        ForEach(messageHistory) { msg in
+                        ForEach(filteredMessages) { msg in
                             ChatBubbleView(message: msg, isCurrentUser: msg.from == globalViewModel.session.username)
                                 .id(msg.id)
                         }
                     }
-                    .onChange(of: WebSocketManager.shared.messages) {
-                        if let newMessage = WebSocketManager.shared.messages.last {
-                            messageHistory.append(newMessage)
+                    .onChange(of: filteredMessages) {
+                        withAnimation {
+                            scrollView.scrollTo(webSocketManager.messages.last?.id, anchor: .bottom)
                         }
                     }
-                    .onChange(of: messageHistory.count) {
+                    .onAppear {
                         withAnimation {
-                            scrollView.scrollTo(messageHistory.last?.id, anchor: .bottom)
+                            scrollView.scrollTo(filteredMessages.last?.id, anchor: .bottom)
                         }
                     }
                 }
                 .padding(.top, 8)
-                .listStyle(.plain)
             }
             
             ChatInputView(messageText: $messageText, onSend: sendMessage)
                 .padding()
-        }
-        .onAppear {
-            from = globalViewModel.session.username
-            Task {
-                do {
-                    messageHistory = try await ServerResponce.shared.getChatHistory(to: toUser?.username ?? " ")
-                } catch {
-                    print("Failed to load messages: \(error.localizedDescription)")
-                }
-            }
         }
         .navigationBarHidden(true)
     }
@@ -210,9 +210,7 @@ struct ChatView: View {
     
     private func sendMessage() {
         guard !messageText.isEmpty else { return }
-        let newMessage = Message(from: from, to: toUser?.username ?? " ", message: messageText, timestamp: Int(Date().timeIntervalSince1970))
-        
-        messageHistory.append(newMessage)
+        let newMessage = Message(from: globalViewModel.session.username, to: toUser?.username ?? " ", message: messageText, timestamp: Int(Date().timeIntervalSince1970))
         messageText = ""
         Task {
             await WebSocketManager.shared.sendMessage(to: toUser?.username ?? " ", message: newMessage.message)
@@ -243,9 +241,7 @@ struct ChatInputView: View {
                 }
                 .transition(.move(edge: .leading))
                 .sheet(isPresented: $isSheetPresented) { // Sheet content
-                    AllCoinsListView(isUserHoldingCoins: true, onSelectCoin: { userCoin in
-                        AnyView(SendView(userHolding: userCoin as! UserHolding))
-                    })
+                    CoinHoldingListView(hasNavigate: true)
                 }
             }
             
@@ -279,7 +275,7 @@ struct ChatInputView: View {
 
 #Preview {
     @Previewable @Namespace var profileAnimation
-    AllUsersListView(profileAnimation: profileAnimation, onSelectUser: { user, _ in
+    UsersListView(profileAnimation: profileAnimation, onSelectUser: { user, _ in
         AnyView(ChatView(toUser: user, profileAnimation: profileAnimation))
     })
 }
